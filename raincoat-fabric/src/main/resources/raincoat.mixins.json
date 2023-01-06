@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.uten2c.raincoat.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MixinMouse",
+    "gui.hud.MixinInGameHud",
+    "gui.screen.option.MixinControlsOptionsScreen",
+    "network.MixinAbstractClientPlayerEntity",
+    "network.MixinClientPlayerEntity",
+    "render.MixinGameRenderer",
+    "render.MixinHeldItemFeatureRenderer",
+    "updater.MixinTitleScreen"
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

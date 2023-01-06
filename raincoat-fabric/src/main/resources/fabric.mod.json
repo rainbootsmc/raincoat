@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "raincoat",
+  "version": "${version}",
+  "name": "Raincoat",
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "accessWidener": "raincoat.accesswidener",
+  "entrypoints": {
+    "preLaunch": [
+      "dev.uten2c.raincoat.MixinExtrasInitializer",
+      "dev.uten2c.raincoat.updater.Updater"
+    ],
+    "client": [
+      "dev.uten2c.raincoat.RaincoatMod"
+    ],
+    "modmenu": [
+      "dev.uten2c.raincoat.RaincoatModMenuApiImpl"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "raincoat.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "minecraft": "${minecraft}",
+    "fabricloader": ">=0.4.0"
+  }
+}

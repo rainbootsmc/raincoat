@@ -1,0 +1,36 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - 'main'
+
+concurrency: ci-${{ github.ref }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci-skip')"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Generate build number
+        id: buildnumber
+        uses: einaregilsson/build-number@v3
+        with:
+          token: ${{ secrets.github_token }}
+          prefix: ${{ github.ref }}
+      - name: Publish
+        uses: uTen2c/publish-to-github@v1.1
+        with:
+          publish-path: ${{ github.workspace }}/build/repo
+          publish-task: publishAll
+          repo: ${{ secrets.REPO }}
+          token-user: ${{ secrets.TOKEN_USER }}
+          token: ${{ secrets.TOKEN }}
+          commit-user-name: ${{ secrets.PUBLISH_COMMIT_USER_NAME }}
+          commit-user-email: ${{ secrets.PUBLISH_COMMIT_USER_EMAIL }}
