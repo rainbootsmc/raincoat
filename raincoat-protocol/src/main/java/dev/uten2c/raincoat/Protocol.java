@@ -17,6 +17,7 @@ public final class Protocol {
     public static final @NotNull PacketId HANDSHAKE_REQUEST = id("handshake/request");
     public static final @NotNull PacketId RECOIL = id("recoil");
     public static final @NotNull PacketId DIRECTION_SEND_REQUEST = id("direction/request");
+    public static final @NotNull PacketId OUTDATED = id("outdated");
 
     private Protocol() {
     }

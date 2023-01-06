@@ -30,6 +30,7 @@ public final class Networking {
         registerReceiver(Protocol.HANDSHAKE_REQUEST, Networking::onHandshakeRequest);
         registerReceiver(Protocol.DIRECTION_SEND_REQUEST, Networking::onDirectionSendRequest);
         registerReceiver(Protocol.RECOIL, (client, handler, buf, listenerAdder) -> onRecoil(client, buf));
+        registerReceiver(Protocol.OUTDATED, Networking::onOutdatedSignal);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -68,6 +69,10 @@ public final class Networking {
             player.setYaw(player.getYaw() + x);
             player.setPitch(player.getPitch() + y);
         }
+    }
+
+    private static void onOutdatedSignal(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender) {
+        States.reset();
     }
 
     public static void sendKeyPressedPacket(@NotNull NamedKey key) {
