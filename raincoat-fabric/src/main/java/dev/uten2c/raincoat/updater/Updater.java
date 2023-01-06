@@ -1,6 +1,7 @@
 package dev.uten2c.raincoat.updater;
 
 import dev.uten2c.raincoat.RaincoatMod;
+import dev.uten2c.raincoat.util.UpdaterUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.jetbrains.annotations.NotNull;
@@ -15,8 +16,6 @@ import java.net.URL;
 import java.nio.file.Files;
 
 public class Updater implements PreLaunchEntrypoint {
-    private static final @NotNull String REPO_URL = "https://rainboots-maven.uten2c.dev";
-    private static final @NotNull String MANIFEST_URL = REPO_URL + "/dev/uten2c/raincoat-fabric/maven-metadata.xml";
     private static @Nullable String updatableVersion;
 
     @Override
@@ -67,7 +66,7 @@ public class Updater implements PreLaunchEntrypoint {
     }
 
     private static @Nullable String fetchReleaseVersion() throws IOException {
-        var url = new URL(MANIFEST_URL);
+        var url = new URL(UpdaterUtils.MAVEN_METAFILE_URL);
         try (var in = download(url)) {
             var factory = DocumentBuilderFactory.newInstance();
             var builder = factory.newDocumentBuilder();
@@ -82,7 +81,7 @@ public class Updater implements PreLaunchEntrypoint {
     }
 
     private static InputStream downloadMod(@NotNull String version) throws Exception {
-        var url = new URL(REPO_URL + "/dev/uten2c/raincoat-fabric/" + version + "/raincoat-fabric-" + version + ".jar");
+        var url = UpdaterUtils.getArtifactUrl(version);
         return download(url);
     }
 
