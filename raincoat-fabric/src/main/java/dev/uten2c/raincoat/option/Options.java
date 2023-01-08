@@ -14,6 +14,7 @@ public final class Options {
     private static double scope2xRelativeSensibility = 0.75f;
     private static double scope4xRelativeSensibility = 0.5f;
     private static boolean adsHold = false;
+    private static boolean invertAttackKey = false;
 
     private Options() {
     }
@@ -27,6 +28,7 @@ public final class Options {
                 scope2xRelativeSensibility = raincoatOptions.getScope2xRelativeSensibility();
                 scope4xRelativeSensibility = raincoatOptions.getScope4xRelativeSensibility();
                 adsHold = raincoatOptions.isAdsHold();
+                invertAttackKey = raincoatOptions.isInvertAttackKey();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -41,7 +43,13 @@ public final class Options {
                 throw new RuntimeException(e);
             }
         }
-        var options = new RaincoatOptions(adsRelativeSensibility, scope2xRelativeSensibility, scope4xRelativeSensibility, adsHold);
+        var options = new RaincoatOptions(
+                adsRelativeSensibility,
+                scope2xRelativeSensibility,
+                scope4xRelativeSensibility,
+                adsHold,
+                invertAttackKey
+        );
         var json = gson.toJson(options);
         try {
             Files.writeString(configPath, json);
@@ -80,5 +88,13 @@ public final class Options {
 
     public static void setAdsHold(boolean adsHold) {
         Options.adsHold = adsHold;
+    }
+
+    public static boolean isInvertAttackKey() {
+        return invertAttackKey;
+    }
+
+    public static void setInvertAttackKey(boolean invertAttackKey) {
+        Options.invertAttackKey = invertAttackKey;
     }
 }

@@ -2,7 +2,7 @@ package dev.uten2c.raincoat;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import dev.uten2c.raincoat.screen.RaincoatOptionsScreen;
+import dev.uten2c.raincoat.option.RaincoatOptionsScreen;
 import net.minecraft.client.MinecraftClient;
 
 public class RaincoatModMenuApiImpl implements ModMenuApi {

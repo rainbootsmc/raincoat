@@ -1,7 +1,6 @@
-package dev.uten2c.raincoat.screen;
+package dev.uten2c.raincoat.option;
 
 import dev.uten2c.raincoat.Networking;
-import dev.uten2c.raincoat.option.Options;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.screen.option.MouseOptionsScreen;
@@ -48,7 +47,17 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
             SimpleOption.emptyTooltip(),
             (optionText, value) -> value ? HOLD_KEY_TEXT : TOGGLE_KEY_TEXT, SimpleOption.BOOLEAN, false, value -> {
     });
-
+    //    private final SimpleOption<Boolean> invertAttackKey = new SimpleOption<>(
+//            "raincoat.options.ads",
+//            SimpleOption.emptyTooltip(),
+//            (optionText, value) -> value ? HOLD_KEY_TEXT : TOGGLE_KEY_TEXT, SimpleOption.BOOLEAN, false, value -> {
+//    });
+    private final SimpleOption<Boolean> invertAttackKey = SimpleOption.ofBoolean(
+            "raincoat.options.invert_attack_key",
+            false,
+            value -> {
+            }
+    );
 
     public RaincoatOptionsScreen(@Nullable Screen parent, GameOptions gameOptions) {
         super(parent, gameOptions, Text.translatable("raincoat.options.title"));
@@ -62,8 +71,10 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         scope2x.setValue(Options.getScope2xRelativeSensibility());
         scope4x.setValue(Options.getScope4xRelativeSensibility());
         adsMode.setValue(Options.isAdsHold());
+        invertAttackKey.setValue(Options.isInvertAttackKey());
 
         this.buttonList = new ButtonListWidget(this.client, this.width, this.height, 32, this.height - 32, 25);
+        buttonList.addOptionEntry(adsMode, invertAttackKey);
         if (InputUtil.isRawMouseMotionSupported()) {
             buttonList.addOptionEntry(gameOptions.getMouseSensitivity(), gameOptions.getRawMouseInput());
         } else {
@@ -72,7 +83,6 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         buttonList.addSingleOptionEntry(ads);
         buttonList.addSingleOptionEntry(scope2x);
         buttonList.addSingleOptionEntry(scope4x);
-        buttonList.addOptionEntry(adsMode, null);
         this.addSelectableChild(this.buttonList);
         this.addDrawableChild(new ButtonWidget(this.width / 2 - 100, this.height - 27, 200, 20, ScreenTexts.DONE, button -> {
             assert this.client != null;
@@ -87,6 +97,7 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         Options.setScope2xRelativeSensibility(roundSensitivity(scope2x.getValue()));
         Options.setScope4xRelativeSensibility(roundSensitivity(scope4x.getValue()));
         Options.setAdsHold(adsMode.getValue());
+        Options.setInvertAttackKey(invertAttackKey.getValue());
         Options.save();
         Networking.sendSettingsUpdate();
     }

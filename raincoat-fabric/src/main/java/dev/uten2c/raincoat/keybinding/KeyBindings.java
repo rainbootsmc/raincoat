@@ -2,6 +2,7 @@ package dev.uten2c.raincoat.keybinding;
 
 import dev.uten2c.raincoat.NamedKey;
 import dev.uten2c.raincoat.Networking;
+import dev.uten2c.raincoat.option.Options;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
@@ -37,25 +38,27 @@ public final class KeyBindings {
                     reloadKeyPressed = false;
                 }
             }
+            var leftClickKey = !Options.isInvertAttackKey() ? NamedKey.ATTACK : NamedKey.USE;
             if (client.options.attackKey.isPressed()) {
                 if (!attackKeyPressed) {
-                    queue.add(() -> Networking.sendKeyPressedPacket(NamedKey.ATTACK));
+                    queue.add(() -> Networking.sendKeyPressedPacket(leftClickKey));
                     attackKeyPressed = true;
                 }
             } else {
                 if (attackKeyPressed) {
-                    queue.add(() -> Networking.sendKeyReleasedPacket(NamedKey.ATTACK));
+                    queue.add(() -> Networking.sendKeyReleasedPacket(leftClickKey));
                     attackKeyPressed = false;
                 }
             }
+            var rightClickKey = !Options.isInvertAttackKey() ? NamedKey.USE : NamedKey.ATTACK;
             if (client.options.useKey.isPressed()) {
                 if (!useKeyPressed) {
-                    queue.add(() -> Networking.sendKeyPressedPacket(NamedKey.USE));
+                    queue.add(() -> Networking.sendKeyPressedPacket(rightClickKey));
                     useKeyPressed = true;
                 }
             } else {
                 if (useKeyPressed) {
-                    queue.add(() -> Networking.sendKeyReleasedPacket(NamedKey.USE));
+                    queue.add(() -> Networking.sendKeyReleasedPacket(rightClickKey));
                     useKeyPressed = false;
                 }
             }

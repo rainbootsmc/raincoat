@@ -1,6 +1,6 @@
 package dev.uten2c.raincoat.mixin.gui.screen.option;
 
-import dev.uten2c.raincoat.screen.RaincoatOptionsScreen;
+import dev.uten2c.raincoat.option.RaincoatOptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.ControlsOptionsScreen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
