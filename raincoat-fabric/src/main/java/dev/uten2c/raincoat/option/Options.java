@@ -23,7 +23,7 @@ public final class Options {
             try (var in = Files.newInputStream(configPath)) {
                 var string = new String(in.readAllBytes());
                 var raincoatOptions = gson.fromJson(string, RaincoatOptions.class);
-                adsRelativeSensibility = raincoatOptions.getScope4xRelativeSensibility();
+                adsRelativeSensibility = raincoatOptions.getAdsRelativeSensibility();
                 scope2xRelativeSensibility = raincoatOptions.getScope2xRelativeSensibility();
                 scope4xRelativeSensibility = raincoatOptions.getScope4xRelativeSensibility();
                 adsHold = raincoatOptions.isAdsHold();
