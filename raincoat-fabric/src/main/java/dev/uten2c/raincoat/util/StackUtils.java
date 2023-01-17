@@ -15,6 +15,7 @@ public final class StackUtils {
     private static final @NotNull String NAMESPACE = "rainboots";
     private static final @NotNull String FLAGS = "Flags";
     private static final @NotNull String THIRD_PERSON_STACK = "ThirdPersonStack";
+    private static final @NotNull String GUI_STACK = "GuiStack";
     private static final @NotNull String GUN_STATE = "GunState";
     private static final @NotNull String GUN_MODEL_STATE = "GunModelState";
     private static final @NotNull String ZOOM_LEVEL = "ZoomLevel";
@@ -52,6 +53,10 @@ public final class StackUtils {
 
     public static @NotNull ItemStack getThirdPersonStack(@NotNull ItemStack stack) {
         return getStackFromTag(stack, THIRD_PERSON_STACK);
+    }
+
+    public static @NotNull ItemStack getGuiStack(@NotNull ItemStack stack) {
+        return getStackFromTag(stack, GUI_STACK);
     }
 
     private static @NotNull ItemStack getStackFromTag(@NotNull ItemStack stack, @NotNull String path) {
