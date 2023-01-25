@@ -25,10 +25,10 @@ public class UpdateScreen extends Screen {
     protected void init() {
         if (completed || error) {
             var buttonWidth = 200;
-            addDrawableChild(new ButtonWidget(width / 2 - buttonWidth / 2, height / 2 + textRenderer.fontHeight, buttonWidth, 20, Text.literal("Minecraftを閉じる"), button -> {
+            addDrawableChild(ButtonWidget.builder(Text.translatable("raincoat.updater.close_game"), button -> {
                 assert this.client != null;
                 this.client.scheduleStop();
-            }));
+            }).dimensions(width / 2 - buttonWidth / 2, height / 2 + textRenderer.fontHeight, buttonWidth, 20).build());
         }
     }
 

@@ -47,11 +47,6 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
             SimpleOption.emptyTooltip(),
             (optionText, value) -> value ? HOLD_KEY_TEXT : TOGGLE_KEY_TEXT, SimpleOption.BOOLEAN, false, value -> {
     });
-    //    private final SimpleOption<Boolean> invertAttackKey = new SimpleOption<>(
-//            "raincoat.options.ads",
-//            SimpleOption.emptyTooltip(),
-//            (optionText, value) -> value ? HOLD_KEY_TEXT : TOGGLE_KEY_TEXT, SimpleOption.BOOLEAN, false, value -> {
-//    });
     private final SimpleOption<Boolean> invertAttackKey = SimpleOption.ofBoolean(
             "raincoat.options.invert_attack_key",
             false,
@@ -84,11 +79,11 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         buttonList.addSingleOptionEntry(scope2x);
         buttonList.addSingleOptionEntry(scope4x);
         this.addSelectableChild(this.buttonList);
-        this.addDrawableChild(new ButtonWidget(this.width / 2 - 100, this.height - 27, 200, 20, ScreenTexts.DONE, button -> {
+        this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> {
             assert this.client != null;
             gameOptions.write();
             this.client.setScreen(this.parent);
-        }));
+        }).dimensions(this.width / 2 - 100, this.height - 27, 200, 20).build());
     }
 
     @Override

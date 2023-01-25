@@ -18,19 +18,11 @@ dependencies {
     minecraft(Lib.MINECRAFT)
     mappings(Lib.MAPPINGS)
     modImplementation(Lib.LOADER)
-    arrayOf(
-        "fabric-api-base",
-        "fabric-command-api-v2",
-        "fabric-lifecycle-events-v1",
-        "fabric-registry-sync-v0",
-        "fabric-resource-loader-v0",
-        "fabric-key-binding-api-v1",
-        "fabric-networking-api-v1",
-    ).forEach { modImplementation(fabricApi.module(it, Version.FABRIC)) }
-    includeAndApi(project(":raincoat-protocol"))
-    includeAndApi(Lib.MIXIN_EXTRAS)
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${Version.FABRIC}")
+    api(include(project(":raincoat-protocol"))!!)
+    api(include(Lib.MIXIN_EXTRAS)!!)
     annotationProcessor(Lib.MIXIN_EXTRAS)
-    modApi("com.terraformersmc:modmenu:4.1.2")
+    modApi(Lib.MOD_MENU)
 }
 
 loom {
