@@ -1,6 +1,7 @@
 package dev.uten2c.raincoat.option;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -9,12 +10,15 @@ import java.nio.file.Path;
 
 public final class Options {
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("raincoat.json");
-    private static final Gson gson = new Gson();
-    private static double adsRelativeSensibility = 1f;
-    private static double scope2xRelativeSensibility = 0.75f;
-    private static double scope4xRelativeSensibility = 0.5f;
-    private static boolean adsHold = false;
-    private static boolean invertAttackKey = false;
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(RaincoatOptions.class, new RaincoatOptions.Deserializer())
+            .create();
+    private static double adsRelativeSensibility;
+    private static double scope2xRelativeSensibility;
+    private static double scope4xRelativeSensibility;
+    private static boolean adsHold;
+    private static boolean invertAttackKey;
+    private static boolean hideCrosshairWhenAds;
 
     private Options() {
     }
@@ -29,6 +33,7 @@ public final class Options {
                 scope4xRelativeSensibility = raincoatOptions.getScope4xRelativeSensibility();
                 adsHold = raincoatOptions.isAdsHold();
                 invertAttackKey = raincoatOptions.isInvertAttackKey();
+                hideCrosshairWhenAds = raincoatOptions.isHideCrosshairWhenAds();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -48,7 +53,8 @@ public final class Options {
                 scope2xRelativeSensibility,
                 scope4xRelativeSensibility,
                 adsHold,
-                invertAttackKey
+                invertAttackKey,
+                hideCrosshairWhenAds
         );
         var json = gson.toJson(options);
         try {
@@ -96,5 +102,13 @@ public final class Options {
 
     public static void setInvertAttackKey(boolean invertAttackKey) {
         Options.invertAttackKey = invertAttackKey;
+    }
+
+    public static boolean isHideCrosshairWhenAds() {
+        return hideCrosshairWhenAds;
+    }
+
+    public static void setHideCrosshairWhenAds(boolean hideCrosshairWhenAds) {
+        Options.hideCrosshairWhenAds = hideCrosshairWhenAds;
     }
 }

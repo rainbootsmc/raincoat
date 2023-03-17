@@ -8,6 +8,7 @@
   "raincoat.options.4x_zoom_relative_sensitivity": "4x Zoom Relative Sensitivity",
   "raincoat.options.ads": "ADS",
   "raincoat.options.invert_attack_key": "Invert Attack Key",
+  "raincoat.options.hide_crosshair_when_ads": "Hide Crosshair When ADS",
   "raincoat.options.key.toggle": "Toggle",
   "raincoat.options.key.hold": "Hold"
 }

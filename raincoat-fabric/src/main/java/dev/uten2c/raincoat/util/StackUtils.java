@@ -3,8 +3,12 @@ package dev.uten2c.raincoat.util;
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener;
 import dev.uten2c.raincoat.zoom.ZoomLevel;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public final class StackUtils {
     private static final int IS_GUN_KEY = 0;
@@ -19,6 +23,7 @@ public final class StackUtils {
     private static final @NotNull String GUN_STATE = "GunState";
     private static final @NotNull String GUN_MODEL_STATE = "GunModelState";
     private static final @NotNull String ZOOM_LEVEL = "ZoomLevel";
+    private static final @NotNull String RENDERING_PARTS = "RenderingParts";
 
     private StackUtils() {
     }
@@ -104,5 +109,18 @@ public final class StackUtils {
 
     public static float getGunModelScale(int modelState) {
         return ScaleMapReloadListener.getScaleMap().getOrDefault("" + modelState, 1.0).floatValue();
+    }
+
+    public static Collection<String> getRenderingParts(@NotNull ItemStack stack) {
+        if (stack.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final var nbt = stack.getSubNbt(NAMESPACE);
+        if (nbt == null) {
+            return Collections.emptyList();
+        }
+        return nbt.getList(RENDERING_PARTS, NbtElement.STRING_TYPE).stream()
+                .map(NbtElement::asString)
+                .toList();
     }
 }

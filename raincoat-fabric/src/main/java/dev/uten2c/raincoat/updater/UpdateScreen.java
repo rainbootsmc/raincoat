@@ -35,7 +35,7 @@ public class UpdateScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
-        drawCenteredText(matrices, textRenderer, title, width / 2, textRenderer.fontHeight, 0xAAAAAA);
+        drawCenteredTextWithShadow(matrices, textRenderer, title, width / 2, textRenderer.fontHeight, 0xAAAAAA);
 
         Text message = null;
         if (error) {
@@ -44,7 +44,7 @@ public class UpdateScreen extends Screen {
             message = Text.literal("完了しました。Minecraftを再起動してください。");
         }
         if (message != null) {
-            drawCenteredText(matrices, textRenderer, message, width / 2, height / 2 - textRenderer.fontHeight, 0xFFFFFF);
+            drawCenteredTextWithShadow(matrices, textRenderer, message, width / 2, height / 2 - textRenderer.fontHeight, 0xFFFFFF);
         }
 
         super.render(matrices, mouseX, mouseY, delta);

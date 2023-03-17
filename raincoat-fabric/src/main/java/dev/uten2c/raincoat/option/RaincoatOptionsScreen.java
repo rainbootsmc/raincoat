@@ -4,8 +4,8 @@ import dev.uten2c.raincoat.Networking;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.screen.option.MouseOptionsScreen;
-import net.minecraft.client.gui.widget.ButtonListWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.OptionListWidget;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.SimpleOption;
 import net.minecraft.client.util.InputUtil;
@@ -21,7 +21,7 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
 
     private final Screen parent;
     private final GameOptions gameOptions;
-    private ButtonListWidget buttonList;
+    private OptionListWidget buttonList;
 
     private final SimpleOption<@NotNull
             Double> ads = new SimpleOption<>(
@@ -53,6 +53,12 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
             value -> {
             }
     );
+    private final SimpleOption<Boolean> hideCrosshairWhenAds = SimpleOption.ofBoolean(
+            "raincoat.options.hide_crosshair_when_ads",
+            false,
+            value -> {
+            }
+    );
 
     public RaincoatOptionsScreen(@Nullable Screen parent, GameOptions gameOptions) {
         super(parent, gameOptions, Text.translatable("raincoat.options.title"));
@@ -67,8 +73,9 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         scope4x.setValue(Options.getScope4xRelativeSensibility());
         adsMode.setValue(Options.isAdsHold());
         invertAttackKey.setValue(Options.isInvertAttackKey());
+        hideCrosshairWhenAds.setValue(Options.isHideCrosshairWhenAds());
 
-        this.buttonList = new ButtonListWidget(this.client, this.width, this.height, 32, this.height - 32, 25);
+        this.buttonList = new OptionListWidget(this.client, this.width, this.height, 32, this.height - 32, 25);
         buttonList.addOptionEntry(adsMode, invertAttackKey);
         if (InputUtil.isRawMouseMotionSupported()) {
             buttonList.addOptionEntry(gameOptions.getMouseSensitivity(), gameOptions.getRawMouseInput());
@@ -78,6 +85,7 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         buttonList.addSingleOptionEntry(ads);
         buttonList.addSingleOptionEntry(scope2x);
         buttonList.addSingleOptionEntry(scope4x);
+        buttonList.addOptionEntry(hideCrosshairWhenAds, null);
         this.addSelectableChild(this.buttonList);
         this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> {
             assert this.client != null;
@@ -93,6 +101,7 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         Options.setScope4xRelativeSensibility(roundSensitivity(scope4x.getValue()));
         Options.setAdsHold(adsMode.getValue());
         Options.setInvertAttackKey(invertAttackKey.getValue());
+        Options.setHideCrosshairWhenAds(hideCrosshairWhenAds.getValue());
         Options.save();
         Networking.sendSettingsUpdate();
     }
@@ -101,7 +110,7 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.renderBackground(matrices);
         this.buttonList.render(matrices, mouseX, mouseY, delta);
-        MouseOptionsScreen.drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 5, 0xFFFFFF);
+        MouseOptionsScreen.drawCenteredTextWithShadow(matrices, this.textRenderer, this.title, this.width / 2, 5, 0xFFFFFF);
         super.render(matrices, mouseX, mouseY, delta);
     }
 

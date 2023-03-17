@@ -2,9 +2,12 @@ package dev.uten2c.raincoat;
 
 import dev.uten2c.raincoat.direction.DirectionListener;
 import dev.uten2c.raincoat.keybinding.KeyBindings;
+import dev.uten2c.raincoat.model.RaincoatModelProvider;
+import dev.uten2c.raincoat.model.RaincoatModelReloadListener;
 import dev.uten2c.raincoat.option.Options;
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resource.ResourceType;
 
@@ -20,5 +23,7 @@ public class RaincoatMod implements ClientModInitializer {
         DirectionListener.register();
 
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new ScaleMapReloadListener());
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new RaincoatModelReloadListener());
+        ModelLoadingRegistry.INSTANCE.registerResourceProvider(RaincoatModelProvider::new);
     }
 }
