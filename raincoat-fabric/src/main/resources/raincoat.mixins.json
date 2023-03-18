@@ -9,6 +9,7 @@
     "gui.screen.option.MixinControlsOptionsScreen",
     "network.MixinAbstractClientPlayerEntity",
     "network.MixinClientPlayerEntity",
+    "network.MixinClientPlayNetworkHandler",
     "render.MixinGameRenderer",
     "render.MixinHeldItemFeatureRenderer",
     "render.MixinItemRenderer",

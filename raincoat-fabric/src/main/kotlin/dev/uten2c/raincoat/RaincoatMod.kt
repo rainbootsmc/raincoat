@@ -4,6 +4,8 @@ import dev.uten2c.raincoat.direction.DirectionListener
 import dev.uten2c.raincoat.keybinding.KeyBindings
 import dev.uten2c.raincoat.model.RaincoatModelProvider
 import dev.uten2c.raincoat.model.RaincoatModelReloadListener
+import dev.uten2c.raincoat.network.Networking
+import dev.uten2c.raincoat.network.PingListener
 import dev.uten2c.raincoat.option.Options
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener
 import net.fabricmc.api.ClientModInitializer
@@ -17,6 +19,7 @@ class RaincoatMod : ClientModInitializer {
         Networking.registerListeners()
         KeyBindings.register()
         DirectionListener.register()
+        PingListener.register()
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(ScaleMapReloadListener())
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(RaincoatModelReloadListener())
         ModelLoadingRegistry.INSTANCE.registerResourceProvider(::RaincoatModelProvider)

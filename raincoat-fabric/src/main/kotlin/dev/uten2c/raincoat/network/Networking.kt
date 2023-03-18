@@ -1,8 +1,9 @@
-package dev.uten2c.raincoat
+package dev.uten2c.raincoat.network
 
-import dev.uten2c.raincoat.States.isOnServer
-import dev.uten2c.raincoat.States.onJoinServer
-import dev.uten2c.raincoat.States.reset
+import dev.uten2c.raincoat.MOD_ID
+import dev.uten2c.raincoat.NamedKey
+import dev.uten2c.raincoat.Protocol
+import dev.uten2c.raincoat.States
 import dev.uten2c.raincoat.option.Options
 import dev.uten2c.raincoat.util.PacketId
 import dev.uten2c.raincoat.util.now
@@ -24,7 +25,7 @@ object Networking {
 
     fun registerListeners() {
         ClientPlayConnectionEvents.JOIN.register { _, _, _ -> onJoin() }
-        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> reset() }
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> States.reset() }
         registerReceiver(Protocol.HANDSHAKE_REQUEST) { _, _, _, _ -> onHandshakeRequest() }
         registerReceiver(Protocol.DIRECTION_SEND_REQUEST) { _, _, buf, _ -> onDirectionSendRequest(buf) }
         registerReceiver(Protocol.RECOIL) { client, _, buf, _ -> onRecoil(client, buf) }
@@ -35,7 +36,7 @@ object Networking {
         if (handshakeRequestedTime != Instant.DISTANT_PAST && now() - handshakeRequestedTime > 20.seconds) {
             return
         }
-        onJoinServer()
+        States.onJoinServer()
         val metadata = FabricLoader.getInstance().getModContainer(MOD_ID).get().metadata
         val version = metadata.version.friendlyString
         val resBuf = PacketByteBufs.create()
@@ -47,7 +48,9 @@ object Networking {
     }
 
     private fun onHandshakeRequest() {
+        println("REQUESTED")
         handshakeRequestedTime = now()
+        States.isHandshakeReceived = true
     }
 
     private fun onDirectionSendRequest(buf: PacketByteBuf) {
@@ -69,7 +72,7 @@ object Networking {
     }
 
     private fun onOutdatedSignal() {
-        reset()
+        States.reset()
     }
 
     @JvmStatic
@@ -100,7 +103,7 @@ object Networking {
     }
 
     private fun send(id: PacketId, buf: PacketByteBuf) {
-        if (isOnServer) {
+        if (States.isOnServer) {
             ClientPlayNetworking.send(identifier(id), buf)
         }
     }

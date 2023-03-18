@@ -1,8 +1,8 @@
 package dev.uten2c.raincoat.keybinding
 
 import dev.uten2c.raincoat.NamedKey
-import dev.uten2c.raincoat.Networking.sendKeyPressedPacket
-import dev.uten2c.raincoat.Networking.sendKeyReleasedPacket
+import dev.uten2c.raincoat.network.Networking.sendKeyPressedPacket
+import dev.uten2c.raincoat.network.Networking.sendKeyReleasedPacket
 import dev.uten2c.raincoat.option.Options
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper

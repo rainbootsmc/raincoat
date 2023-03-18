@@ -1,6 +1,6 @@
 package dev.uten2c.raincoat.option;
 
-import dev.uten2c.raincoat.Networking;
+import dev.uten2c.raincoat.network.Networking;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.screen.option.MouseOptionsScreen;

@@ -5,10 +5,14 @@ object States {
     var isOnServer = false
         private set
 
+    @JvmStatic
+    var isHandshakeReceived = false
+
     var directionSendRequestedTime: Long? = null
 
     fun reset() {
         isOnServer = false
+        isHandshakeReceived = false
         directionSendRequestedTime = null
     }
 
