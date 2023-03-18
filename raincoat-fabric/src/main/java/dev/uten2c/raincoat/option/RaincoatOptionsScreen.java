@@ -103,7 +103,7 @@ public class RaincoatOptionsScreen extends GameOptionsScreen {
         Options.setInvertAttackKey(invertAttackKey.getValue());
         Options.setHideCrosshairWhenAds(hideCrosshairWhenAds.getValue());
         Options.save();
-        Networking.sendSettingsUpdate();
+        Networking.INSTANCE.sendSettingsUpdate();
     }
 
     @Override

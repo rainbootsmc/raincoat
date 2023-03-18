@@ -9,13 +9,13 @@
   "entrypoints": {
     "preLaunch": [
       "dev.uten2c.raincoat.MixinExtrasInitializer",
-      "dev.uten2c.raincoat.updater.Updater"
+      "dev.uten2c.raincoat.updater.UpdaterEntrypoint"
     ],
     "client": [
       "dev.uten2c.raincoat.RaincoatMod"
     ],
     "modmenu": [
-      "dev.uten2c.raincoat.RaincoatModMenuApiImpl"
+      "dev.uten2c.raincoat.modmenu.RaincoatModMenuApiImpl"
     ]
   },
   "mixins": [

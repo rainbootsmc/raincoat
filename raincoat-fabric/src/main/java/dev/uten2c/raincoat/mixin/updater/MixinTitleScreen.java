@@ -23,7 +23,7 @@ public abstract class MixinTitleScreen extends Screen {
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setConnectedToRealms(Z)V"))
     private void init(CallbackInfo ci) {
         if (!Updater.isUpdateAvailable()) {
-            Updater.asyncFetchReleaseVersion();
+            Updater.asyncCheckUpdate();
             return;
         }
         var textWidth = this.textRenderer.getWidth(CLIENT_UPDATE_TEXT);

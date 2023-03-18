@@ -12,6 +12,7 @@
     "render.MixinGameRenderer",
     "render.MixinHeldItemFeatureRenderer",
     "render.MixinItemRenderer",
+    "render.MixinPlayerEntityRenderer",
     "updater.MixinTitleScreen"
   ],
   "mixins": [
