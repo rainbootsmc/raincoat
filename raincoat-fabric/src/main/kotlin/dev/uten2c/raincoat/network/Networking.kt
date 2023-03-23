@@ -4,7 +4,7 @@ import dev.uten2c.raincoat.MOD_ID
 import dev.uten2c.raincoat.NamedKey
 import dev.uten2c.raincoat.Protocol
 import dev.uten2c.raincoat.States
-import dev.uten2c.raincoat.option.Options
+import dev.uten2c.raincoat.option.OptionManager
 import dev.uten2c.raincoat.util.PacketId
 import dev.uten2c.raincoat.util.now
 import kotlinx.datetime.Instant
@@ -95,7 +95,7 @@ object Networking {
     }
 
     fun sendSettingsUpdate() {
-        send(Protocol.SETTINGS_UPDATE) { buf: PacketByteBuf -> buf.writeBoolean(Options.isAdsHold()) }
+        send(Protocol.SETTINGS_UPDATE) { buf: PacketByteBuf -> buf.writeBoolean(OptionManager.options.isAdsHold) }
     }
 
     private fun registerReceiver(id: PacketId, channelHandler: ClientPlayNetworking.PlayChannelHandler) {

@@ -6,7 +6,7 @@ import dev.uten2c.raincoat.model.RaincoatModelProvider
 import dev.uten2c.raincoat.model.RaincoatModelReloadListener
 import dev.uten2c.raincoat.network.Networking
 import dev.uten2c.raincoat.network.PingListener
-import dev.uten2c.raincoat.option.Options
+import dev.uten2c.raincoat.option.OptionManager
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
@@ -15,7 +15,7 @@ import net.minecraft.resource.ResourceType
 
 class RaincoatMod : ClientModInitializer {
     override fun onInitializeClient() {
-        Options.load()
+        OptionManager.load()
         Networking.registerListeners()
         KeyBindings.register()
         DirectionListener.register()

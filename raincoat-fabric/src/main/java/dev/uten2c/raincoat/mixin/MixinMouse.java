@@ -1,6 +1,6 @@
 package dev.uten2c.raincoat.mixin;
 
-import dev.uten2c.raincoat.option.Options;
+import dev.uten2c.raincoat.option.OptionManager;
 import dev.uten2c.raincoat.util.StackUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
@@ -52,18 +52,19 @@ public class MixinMouse {
         cursorYSmoother.clear();
         var x = 0.0;
         var y = 0.0;
+        final var options = OptionManager.getOptions();
         switch (zoomLevel) {
             case ZOOM_1X -> {
-                x = cursorDeltaX * amount * Options.getAdsRelativeSensibility();
-                y = cursorDeltaY * amount * Options.getAdsRelativeSensibility();
+                x = cursorDeltaX * amount * options.getAdsRelativeSensibility();
+                y = cursorDeltaY * amount * options.getAdsRelativeSensibility();
             }
             case ZOOM_2X -> {
-                x = cursorDeltaX * amount * Options.getScope2xRelativeSensibility();
-                y = cursorDeltaY * amount * Options.getScope2xRelativeSensibility();
+                x = cursorDeltaX * amount * options.getScope2xRelativeSensibility();
+                y = cursorDeltaY * amount * options.getScope2xRelativeSensibility();
             }
             case ZOOM_4X -> {
-                x = cursorDeltaX * amount * Options.getScope4xRelativeSensibility();
-                y = cursorDeltaY * amount * Options.getScope4xRelativeSensibility();
+                x = cursorDeltaX * amount * options.getScope4xRelativeSensibility();
+                y = cursorDeltaY * amount * options.getScope4xRelativeSensibility();
             }
         }
         cursorDeltaX = 0;

@@ -3,7 +3,7 @@ package dev.uten2c.raincoat.keybinding
 import dev.uten2c.raincoat.NamedKey
 import dev.uten2c.raincoat.network.Networking.sendKeyPressedPacket
 import dev.uten2c.raincoat.network.Networking.sendKeyReleasedPacket
-import dev.uten2c.raincoat.option.Options
+import dev.uten2c.raincoat.option.OptionManager
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.minecraft.client.option.KeyBinding
@@ -21,10 +21,10 @@ object KeyBindings {
         ClientTickEvents.START_CLIENT_TICK.register { client ->
             listen(NamedKey.RELOAD, reloadKeyBinding.isPressed)
 
-            val leftClickKey = if (!Options.isInvertAttackKey()) NamedKey.ATTACK else NamedKey.USE
+            val leftClickKey = if (!OptionManager.options.isInvertAttackKey) NamedKey.ATTACK else NamedKey.USE
             listen(leftClickKey, client.options.attackKey.isPressed)
 
-            val rightClickKey = if (!Options.isInvertAttackKey()) NamedKey.USE else NamedKey.ATTACK
+            val rightClickKey = if (!OptionManager.options.isInvertAttackKey) NamedKey.USE else NamedKey.ATTACK
             listen(rightClickKey, client.options.useKey.isPressed)
         }
         ClientTickEvents.END_CLIENT_TICK.register {

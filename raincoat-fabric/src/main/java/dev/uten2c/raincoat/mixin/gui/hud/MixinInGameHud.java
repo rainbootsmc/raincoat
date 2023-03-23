@@ -1,7 +1,7 @@
 package dev.uten2c.raincoat.mixin.gui.hud;
 
 import dev.uten2c.raincoat.States;
-import dev.uten2c.raincoat.option.Options;
+import dev.uten2c.raincoat.option.OptionManager;
 import dev.uten2c.raincoat.util.StackUtils;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -25,7 +25,7 @@ public abstract class MixinInGameHud extends DrawableHelper {
             return;
         }
         var stack = player.getMainHandStack();
-        if (States.isOnServer() && StackUtils.noCrossHair(stack) && Options.isHideCrosshairWhenAds()) {
+        if (States.isOnServer() && StackUtils.noCrossHair(stack) && OptionManager.getOptions().isHideCrosshairWhenAds()) {
             ci.cancel();
         }
     }
