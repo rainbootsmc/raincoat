@@ -6,8 +6,6 @@ import dev.uten2c.raincoat.Protocol
 import dev.uten2c.raincoat.States
 import dev.uten2c.raincoat.option.OptionManager
 import dev.uten2c.raincoat.util.PacketId
-import dev.uten2c.raincoat.util.now
-import kotlinx.datetime.Instant
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
@@ -17,14 +15,11 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 import org.slf4j.LoggerFactory
 import java.util.function.Consumer
-import kotlin.time.Duration.Companion.seconds
 
 object Networking {
     private val LOGGER = LoggerFactory.getLogger("Raincoat Networking")
-    private var handshakeRequestedTime = Instant.DISTANT_PAST
 
     fun registerListeners() {
-        ClientPlayConnectionEvents.JOIN.register { _, _, _ -> onJoin() }
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> States.reset() }
         registerReceiver(Protocol.HANDSHAKE_REQUEST) { _, _, _, _ -> onHandshakeRequest() }
         registerReceiver(Protocol.DIRECTION_SEND_REQUEST) { _, _, buf, _ -> onDirectionSendRequest(buf) }
@@ -32,10 +27,9 @@ object Networking {
         registerReceiver(Protocol.OUTDATED) { _, _, _, _ -> onOutdatedSignal() }
     }
 
-    private fun onJoin() {
-        if (handshakeRequestedTime != Instant.DISTANT_PAST && now() - handshakeRequestedTime > 20.seconds) {
-            return
-        }
+    private fun onHandshakeRequest() {
+        States.isHandshakeReceived = true
+
         States.onJoinServer()
         val metadata = FabricLoader.getInstance().getModContainer(MOD_ID).get().metadata
         val version = metadata.version.friendlyString
@@ -45,12 +39,6 @@ object Networking {
         LOGGER.info("Send handshake packet (version: {}, protocol: {})", version, Protocol.PROTOCOL_VERSION)
         send(Protocol.HANDSHAKE_RESPONSE, resBuf)
         sendSettingsUpdate()
-    }
-
-    private fun onHandshakeRequest() {
-        println("REQUESTED")
-        handshakeRequestedTime = now()
-        States.isHandshakeReceived = true
     }
 
     private fun onDirectionSendRequest(buf: PacketByteBuf) {
