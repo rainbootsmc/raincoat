@@ -3,7 +3,14 @@
   "id": "raincoat",
   "version": "${version}",
   "name": "Raincoat",
+  "description": "Rainbootsサーバーのプレイ体験を向上させる専用クライアントMOD",
+  "authors": [
+    "RainbootsMC"
+  ],
   "license": "All-Rights-Reserved",
+  "contact": {
+    "sources": "https://github.com/rainbootsmc/raincoat"
+  },
   "environment": "client",
   "accessWidener": "raincoat.accesswidener",
   "entrypoints": {
@@ -27,5 +34,12 @@
   "depends": {
     "minecraft": "${minecraft}",
     "fabricloader": ">=0.4.0"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.twitter": "https://twitter.com/RainbootsMC"
+      }
+    }
   }
 }
