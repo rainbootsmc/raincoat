@@ -29,7 +29,7 @@ dependencies {
     implementation(include(Lib.COROUTINES_JDK8)!!)
     implementation(include(Lib.SERIALIZATION_CORE)!!)
     implementation(include(Lib.SERIALIZATION_JSON)!!)
-    implementation(include(Lib.SERIALIZATION_PROTOBUF)!!)
+    implementation(include(Lib.SERIALIZATION_CBOR)!!)
     implementation(include(Lib.DATETIME)!!)
     implementation(include(Lib.FUEL)!!)
     implementation(include(Lib.FUEL_CORUTINES)!!)

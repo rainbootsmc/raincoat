@@ -1,8 +1,8 @@
 package dev.uten2c.raincoat.resource
 
 import dev.uten2c.raincoat.MOD_ID
+import dev.uten2c.raincoat.modelCbor
 import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener
 import net.minecraft.resource.ResourceManager
 import net.minecraft.util.Identifier
@@ -16,7 +16,7 @@ class ScaleMapReloadListener : SimpleSynchronousResourceReloadListener {
         manager.getResource(Identifier("raincoat", "scales")).ifPresent { resource ->
             resource.inputStream.use { input ->
                 kotlin.runCatching {
-                    scaleMap = ProtoBuf.decodeFromByteArray(input.readAllBytes())
+                    scaleMap = modelCbor.decodeFromByteArray(input.readAllBytes())
                 }.onFailure {
                     it.printStackTrace()
                 }
