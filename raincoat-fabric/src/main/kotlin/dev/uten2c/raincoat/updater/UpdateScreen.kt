@@ -11,6 +11,7 @@ import net.minecraft.util.Formatting
 class UpdateScreen : Screen(Text.literal("Raincoat Updater")) {
     private var completed = false
     private var error = false
+    private lateinit var closeButton: ButtonWidget
 
     init {
         Updater.scope.launch {
@@ -19,6 +20,7 @@ class UpdateScreen : Screen(Text.literal("Raincoat Updater")) {
             } else {
                 error = true
             }
+            updateCloseButtonState()
         }
     }
 
@@ -27,29 +29,33 @@ class UpdateScreen : Screen(Text.literal("Raincoat Updater")) {
     }
 
     override fun init() {
-        if (completed || error) {
-            val buttonWidth = 200
-            addDrawableChild(
-                ButtonWidget.builder(Text.translatable("raincoat.updater.close_game")) {
-                    assert(client != null)
-                    client!!.scheduleStop()
-                }.dimensions(width / 2 - buttonWidth / 2, height / 2 + textRenderer.fontHeight, buttonWidth, 20).build(),
-            )
-        }
+        val buttonWidth = 200
+        closeButton = addDrawableChild(
+            ButtonWidget.builder(Text.translatable("raincoat.updater.close_game")) {
+                assert(client != null)
+                client!!.scheduleStop()
+            }.dimensions(width / 2 - buttonWidth / 2, height / 2 + textRenderer.fontHeight, buttonWidth, 20).build(),
+        )
+        updateCloseButtonState()
     }
 
     override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         renderBackground(matrices)
         drawCenteredTextWithShadow(matrices, textRenderer, title, width / 2, textRenderer.fontHeight, 0xAAAAAA)
-        var message: Text? = null
-        if (error) {
-            message = Text.literal("エラーが発生しました。Minecraftを再起動してください。").setStyle(Style.EMPTY.withColor(Formatting.RED))
+        val message = if (error) {
+            Text.literal("エラーが発生しました。Minecraftを再起動してください。").setStyle(Style.EMPTY.withColor(Formatting.RED))
         } else if (completed) {
-            message = Text.literal("完了しました。Minecraftを再起動してください。")
+            Text.literal("完了しました。Minecraftを再起動してください。")
+        } else {
+            Text.literal("Raincoatを更新中...")
         }
         if (message != null) {
             drawCenteredTextWithShadow(matrices, textRenderer, message, width / 2, height / 2 - textRenderer.fontHeight, 0xFFFFFF)
         }
         super.render(matrices, mouseX, mouseY, delta)
+    }
+
+    private fun updateCloseButtonState() {
+        closeButton.active = completed || error
     }
 }

@@ -22,17 +22,22 @@ object Updater {
 
     suspend fun startDownload(): Boolean {
         val updatableVersion = updatableVersion ?: return false
-        val bytes = kotlin.runCatching {
+        val bytes = runCatching {
             Fuel.get(UpdaterUtils.getArtifactUrl(updatableVersion)).awaitByteArray()
         }.onFailure {
             logger.error("MODのダウンロードに失敗しました", it)
             return false
         }.getOrThrow()
-        val jarPath = modContainer.origin.paths[0]
-        withContext(Dispatchers.IO) {
-            Files.newOutputStream(jarPath).use { out ->
-                out.write(bytes)
+        runCatching {
+            val jarPath = modContainer.origin.paths[0]
+            withContext(Dispatchers.IO) {
+                Files.newOutputStream(jarPath).use { out ->
+                    out.write(bytes)
+                }
             }
+        }.onFailure {
+            logger.error("ファイルへの書き込みに失敗しました", it)
+            return false
         }
         return true
     }
