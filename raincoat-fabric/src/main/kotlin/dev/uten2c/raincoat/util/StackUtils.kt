@@ -3,6 +3,8 @@ package dev.uten2c.raincoat.util
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener
 import dev.uten2c.raincoat.zoom.ZoomLevel
 import net.minecraft.item.ItemStack
+import net.minecraft.text.Text
+import net.minecraft.text.TextContent
 
 object StackUtils {
     private const val IS_GUN_KEY = 0
@@ -28,10 +30,12 @@ object StackUtils {
         return getFlag(stack, CAN_NOT_DROP)
     }
 
+    @JvmStatic
     fun canNotClick(stack: ItemStack): Boolean {
         return getFlag(stack, CAN_NOT_CLICK)
     }
 
+    @JvmStatic
     fun noSlotHighlight(stack: ItemStack): Boolean {
         return getFlag(stack, NO_SLOT_HIGHLIGHT)
     }
@@ -92,5 +96,18 @@ object StackUtils {
     @JvmStatic
     fun getGunModelScale(modelState: Int): Float {
         return ScaleMapReloadListener.scaleMap.getOrDefault(modelState, 1f)
+    }
+
+    @JvmStatic
+    fun shouldDisableTooltip(stack: ItemStack): Boolean {
+        if (!stack.hasCustomName()) {
+            return false
+        }
+        runCatching {
+            val string = stack.getSubNbt(ItemStack.DISPLAY_KEY)?.getString(ItemStack.NAME_KEY) ?: return false
+            val text = Text.Serializer.fromJson(string)
+            return text?.content == TextContent.EMPTY
+        }
+        return false
     }
 }

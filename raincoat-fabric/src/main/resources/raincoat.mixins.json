@@ -6,9 +6,11 @@
   "client": [
     "MixinMouse",
     "gui.hud.MixinInGameHud",
+    "gui.screen.ingame.MixinHandledScreen",
     "gui.screen.option.MixinControlsOptionsScreen",
     "network.MixinAbstractClientPlayerEntity",
     "network.MixinClientPlayerEntity",
+    "network.MixinClientPlayerInteractionManager",
     "network.MixinClientPlayNetworkHandler",
     "render.MixinGameRenderer",
     "render.MixinHeldItemFeatureRenderer",
