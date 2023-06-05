@@ -105,8 +105,13 @@ object StackUtils {
         }
         runCatching {
             val string = stack.getSubNbt(ItemStack.DISPLAY_KEY)?.getString(ItemStack.NAME_KEY) ?: return false
-            val text = Text.Serializer.fromJson(string)
-            return text?.content == TextContent.EMPTY
+            val text = Text.Serializer.fromJson(string) ?: return false
+            if (text == Text.EMPTY) {
+                return true
+            }
+            if (text.content == TextContent.EMPTY && text.siblings.isEmpty()) {
+                return true
+            }
         }
         return false
     }
