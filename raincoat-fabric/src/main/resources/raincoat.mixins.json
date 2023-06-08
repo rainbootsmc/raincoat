@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "MixinMouse",
+    "gui.MixinDrawContext",
     "gui.hud.MixinInGameHud",
     "gui.screen.ingame.MixinHandledScreen",
     "gui.screen.option.MixinControlsOptionsScreen",

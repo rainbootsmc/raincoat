@@ -9,7 +9,8 @@
   ],
   "license": "All-Rights-Reserved",
   "contact": {
-    "sources": "https://github.com/rainbootsmc/raincoat"
+    "sources": "https://github.com/rainbootsmc/raincoat",
+    "issues": "https://github.com/rainbootsmc/raincoat/issues"
   },
   "environment": "client",
   "accessWidener": "raincoat.accesswidener",

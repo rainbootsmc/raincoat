@@ -4,6 +4,7 @@ object Lib {
     const val LOADER = "net.fabricmc:fabric-loader:${Version.LOADER}"
     const val MIXIN_EXTRAS = "com.github.LlamaLad7:MixinExtras:${Version.MIXIN_EXTRAS}"
 
+    const val FABRIC_API = "net.fabricmc.fabric-api:fabric-api:${Version.FABRIC}"
     const val MOD_MENU = "com.terraformersmc:modmenu:${Version.MOD_MENU}"
 
     const val KOTLIN_STBLIB = "org.jetbrains.kotlin:kotlin-stdlib:${Version.KOTLIN}"

@@ -3,6 +3,7 @@ package dev.uten2c.raincoat.mixin.gui.screen.ingame;
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import dev.uten2c.raincoat.States;
 import dev.uten2c.raincoat.util.StackUtils;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.slot.Slot;
@@ -19,8 +20,8 @@ public class MixinHandledScreen {
     @Nullable
     protected Slot focusedSlot;
 
-    @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;drawSlotHighlight(Lnet/minecraft/client/util/math/MatrixStack;III)V"))
-    private boolean disableSlotHighlight(MatrixStack matrices, int x, int y, int z) {
+    @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;drawSlotHighlight(Lnet/minecraft/client/gui/DrawContext;III)V"))
+    private boolean disableSlotHighlight(DrawContext context, int x, int y, int z) {
         if (!States.isOnServer()) {
             return true;
         }
@@ -32,7 +33,7 @@ public class MixinHandledScreen {
     }
 
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
-    private void disableTooltip(MatrixStack matrices, int x, int y, CallbackInfo ci) {
+    private void disableTooltip(DrawContext context, int x, int y, CallbackInfo ci) {
         if (!States.isOnServer()) {
             return;
         }

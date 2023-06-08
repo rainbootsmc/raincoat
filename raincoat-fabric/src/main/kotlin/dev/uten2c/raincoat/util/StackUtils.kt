@@ -1,5 +1,6 @@
 package dev.uten2c.raincoat.util
 
+import dev.uten2c.raincoat.States.isOnServer
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener
 import dev.uten2c.raincoat.zoom.ZoomLevel
 import net.minecraft.item.ItemStack
@@ -55,8 +56,7 @@ object StackUtils {
         return getStackFromTag(stack, THIRD_PERSON_STACK)
     }
 
-    @JvmStatic
-    fun getGuiStack(stack: ItemStack): ItemStack {
+    private fun getGuiStack(stack: ItemStack): ItemStack {
         return getStackFromTag(stack, GUI_STACK)
     }
 
@@ -114,5 +114,20 @@ object StackUtils {
             }
         }
         return false
+    }
+
+    @JvmStatic
+    fun swapGuiStack(stack: ItemStack): ItemStack {
+        if (!isOnServer) {
+            return stack
+        }
+        if (stack.isEmpty) {
+            return stack
+        }
+        val guiStack = getGuiStack(stack)
+        if (guiStack.isEmpty) {
+            return stack
+        }
+        return guiStack
     }
 }

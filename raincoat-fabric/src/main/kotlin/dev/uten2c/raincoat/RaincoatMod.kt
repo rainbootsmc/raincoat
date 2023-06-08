@@ -11,6 +11,7 @@ import dev.uten2c.raincoat.resource.ScaleMapReloadListener
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
+import net.minecraft.client.main.Main
 import net.minecraft.resource.ResourceType
 
 class RaincoatMod : ClientModInitializer {

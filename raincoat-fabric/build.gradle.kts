@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("fabric-loom")
+    id("io.github.juuxel.loom-quiltflower")
     kotlin("jvm") version Version.KOTLIN
     kotlin("plugin.serialization") version Version.KOTLIN
     `maven-publish`
@@ -22,7 +23,7 @@ dependencies {
     minecraft(Lib.MINECRAFT)
     mappings(Lib.MAPPINGS)
     modImplementation(Lib.LOADER)
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${Version.FABRIC}")
+    modImplementation(Lib.FABRIC_API)
     implementation(include(Lib.KOTLIN_STBLIB)!!)
     implementation(include(Lib.KOTLIN_STBLIB_JDK8)!!)
     implementation(include(Lib.COROUTINES_CORE)!!)

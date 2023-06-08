@@ -7,6 +7,7 @@ import dev.uten2c.raincoat.MOD_ID
 import dev.uten2c.raincoat.util.UpdaterUtils
 import kotlinx.coroutines.*
 import net.fabricmc.loader.api.FabricLoader
+import net.fabricmc.loader.api.SemanticVersion
 import java.nio.file.Files
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -52,9 +53,14 @@ object Updater {
     private suspend fun checkUpdate() {
         fetchReleaseVersion()
             .onSuccess { releaseVersion ->
-                val currentVersion = modContainer.metadata.version
-                if (currentVersion.friendlyString != releaseVersion) {
-                    updatableVersion = releaseVersion
+                runCatching {
+                    SemanticVersion.parse(modContainer.metadata.version.friendlyString)
+                }.onSuccess { currentVersion ->
+                    if (equalsMinecraftVersion(currentVersion, releaseVersion)) {
+                        updatableVersion = releaseVersion.friendlyString
+                    }
+                }.onFailure {
+                    logger.warn("バージョンのパースに失敗しました")
                 }
             }
             .onFailure {
@@ -62,7 +68,7 @@ object Updater {
             }
     }
 
-    private suspend fun fetchReleaseVersion(): Result<String> {
+    private suspend fun fetchReleaseVersion(): Result<SemanticVersion> {
         return kotlin.runCatching {
             val bytes = Fuel.get(UpdaterUtils.MAVEN_METAFILE_URL).awaitByteArray()
             val factory = DocumentBuilderFactory.newInstance()
@@ -70,7 +76,14 @@ object Updater {
             val document = builder.parse(bytes.inputStream())
             val element = document.documentElement
             val release = element.getElementsByTagName("release")
-            release.item(0).textContent
+            val versionString = release.item(0).textContent
+            SemanticVersion.parse(versionString)
         }
+    }
+
+    private fun equalsMinecraftVersion(a: SemanticVersion, b: SemanticVersion): Boolean {
+        return a.getVersionComponent(0) == b.getVersionComponent(0) &&
+                a.getVersionComponent(1) == b.getVersionComponent(1) &&
+                a.getVersionComponent(2) == b.getVersionComponent(2)
     }
 }

@@ -4,6 +4,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
+import kotlin.io.path.exists
+import kotlin.io.path.notExists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
@@ -17,6 +19,9 @@ object OptionManager {
         private set
 
     fun load() {
+        if (configPath.notExists()) {
+            return
+        }
         runCatching {
             options = json.decodeFromString(configPath.readText())
         }.onFailure { it.printStackTrace() }

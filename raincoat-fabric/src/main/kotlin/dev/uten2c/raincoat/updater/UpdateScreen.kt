@@ -1,9 +1,9 @@
 package dev.uten2c.raincoat.updater
 
 import kotlinx.coroutines.launch
+import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
@@ -39,9 +39,9 @@ class UpdateScreen : Screen(Text.literal("Raincoat Updater")) {
         updateCloseButtonState()
     }
 
-    override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(matrices)
-        drawCenteredTextWithShadow(matrices, textRenderer, title, width / 2, textRenderer.fontHeight, 0xAAAAAA)
+    override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
+        renderBackground(context)
+        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, textRenderer.fontHeight, 0xAAAAAA)
         val message = if (error) {
             Text.literal("エラーが発生しました。Minecraftを再起動してください。").setStyle(Style.EMPTY.withColor(Formatting.RED))
         } else if (completed) {
@@ -50,9 +50,15 @@ class UpdateScreen : Screen(Text.literal("Raincoat Updater")) {
             Text.literal("Raincoatを更新中...")
         }
         if (message != null) {
-            drawCenteredTextWithShadow(matrices, textRenderer, message, width / 2, height / 2 - textRenderer.fontHeight, 0xFFFFFF)
+            context.drawCenteredTextWithShadow(
+                textRenderer,
+                message,
+                width / 2,
+                height / 2 - textRenderer.fontHeight,
+                0xFFFFFF,
+            )
         }
-        super.render(matrices, mouseX, mouseY, delta)
+        super.render(context, mouseX, mouseY, delta)
     }
 
     private fun updateCloseButtonState() {
