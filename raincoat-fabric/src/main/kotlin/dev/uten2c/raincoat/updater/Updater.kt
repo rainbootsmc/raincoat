@@ -10,6 +10,7 @@ import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.loader.api.SemanticVersion
 import java.nio.file.Files
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.jvm.optionals.getOrNull
 
 object Updater {
     private val logger = LogUtils.getLogger()
@@ -56,7 +57,7 @@ object Updater {
                 runCatching {
                     SemanticVersion.parse(modContainer.metadata.version.friendlyString)
                 }.onSuccess { currentVersion ->
-                    if (equalsMinecraftVersion(currentVersion, releaseVersion)) {
+                    if (shouldUpdate(currentVersion, releaseVersion)) {
                         updatableVersion = releaseVersion.friendlyString
                     }
                 }.onFailure {
@@ -79,6 +80,11 @@ object Updater {
             val versionString = release.item(0).textContent
             SemanticVersion.parse(versionString)
         }
+    }
+
+    private fun shouldUpdate(current: SemanticVersion, latest: SemanticVersion): Boolean {
+        return equalsMinecraftVersion(current, latest) &&
+                current.buildKey.getOrNull() != latest.buildKey.getOrNull()
     }
 
     private fun equalsMinecraftVersion(a: SemanticVersion, b: SemanticVersion): Boolean {
