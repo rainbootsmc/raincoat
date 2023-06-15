@@ -23,7 +23,7 @@ jobs:
         with:
           token: ${{ secrets.github_token }}
           prefix: ${{ github.ref_name }}
-      - name: Publish
+      - name: Publish to Maven repository
         uses: uTen2c/publish-to-github@v1.1
         with:
           publish-path: ${{ github.workspace }}/build/repo
@@ -33,3 +33,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
           commit-user-name: ${{ secrets.PUBLISH_COMMIT_USER_NAME }}
           commit-user-email: ${{ secrets.PUBLISH_COMMIT_USER_EMAIL }}
+      - name: Publish to Modrinth
+        run: ./gradlew modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
