@@ -5,6 +5,7 @@ plugins {
     id("io.github.juuxel.loom-quiltflower")
     kotlin("jvm") version Version.KOTLIN
     kotlin("plugin.serialization") version Version.KOTLIN
+    id("com.modrinth.minotaur") version "2.+"
     `maven-publish`
 }
 
@@ -73,4 +74,19 @@ publishing {
             }
         }
     }
+}
+
+modrinth {
+    token.set(Modrinth.token)
+    projectId.set(Modrinth.PROJECT_ID)
+    versionNumber.set(Version.project)
+    versionType.set("release")
+    uploadFile.set(tasks.getByName("remapJar"))
+    gameVersions.add(Version.MINECRAFT)
+    dependencies {
+        required.project("fabric-api")
+        optional.project("modmenu")
+    }
+
+    syncBodyFrom.set(rootProject.file("README.md").readText())
 }

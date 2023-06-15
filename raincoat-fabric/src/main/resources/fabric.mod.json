@@ -8,6 +8,7 @@
     "RainbootsMC"
   ],
   "license": "All-Rights-Reserved",
+  "icon": "assets/raincoat/icon.png",
   "contact": {
     "sources": "https://github.com/rainbootsmc/raincoat",
     "issues": "https://github.com/rainbootsmc/raincoat/issues"
@@ -34,7 +35,11 @@
   ],
   "depends": {
     "minecraft": "${minecraft}",
-    "fabricloader": ">=0.4.0"
+    "fabricloader": ">=0.4.0",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
   },
   "custom": {
     "modmenu": {

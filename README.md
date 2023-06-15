@@ -1,2 +1,3 @@
 # Raincoat
-Rainbootsサーバーのプレイ体験を向上させる専用クライアントMOD
+
+Dedicated client mod to improve the playing experience on Rainboots server
