@@ -24,7 +24,7 @@ jobs:
           token: ${{ secrets.github_token }}
           prefix: ${{ github.ref_name }}
       - name: Publish to Maven repository
-        uses: uTen2c/publish-to-github@v1.1
+        uses: uTen2c/publish-to-github@v1.2
         with:
           publish-path: ${{ github.workspace }}/build/repo
           publish-task: publishAll
