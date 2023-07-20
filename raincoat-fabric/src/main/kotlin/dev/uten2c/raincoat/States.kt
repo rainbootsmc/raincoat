@@ -10,10 +10,14 @@ object States {
 
     var directionSendRequestedTime: Long? = null
 
+    @JvmStatic
+    var isRecoiling = false
+
     fun reset() {
         isOnServer = false
         isHandshakeReceived = false
         directionSendRequestedTime = null
+        isRecoiling = false
     }
 
     fun onJoinServer() {

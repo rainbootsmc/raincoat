@@ -4,7 +4,7 @@ import dev.uten2c.raincoat.util.PacketId;
 import org.jetbrains.annotations.NotNull;
 
 public final class Protocol {
-    public static final int PROTOCOL_VERSION = 2;
+    public static final int PROTOCOL_VERSION = 3;
 
     // C2S
     public static final @NotNull PacketId HANDSHAKE_RESPONSE = id("handshake/response");
@@ -15,7 +15,8 @@ public final class Protocol {
 
     // S2C
     public static final @NotNull PacketId HANDSHAKE_REQUEST = id("handshake/request");
-    public static final @NotNull PacketId RECOIL = id("recoil");
+    public static final @NotNull PacketId RECOIL_CAMERA = id("recoil/camera");
+    public static final @NotNull PacketId RECOIL_ANIMATION = id("recoil/animation");
     public static final @NotNull PacketId DIRECTION_SEND_REQUEST = id("direction/request");
     public static final @NotNull PacketId OUTDATED = id("outdated");
 

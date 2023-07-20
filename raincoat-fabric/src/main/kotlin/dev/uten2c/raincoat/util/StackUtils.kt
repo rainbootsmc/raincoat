@@ -1,5 +1,6 @@
 package dev.uten2c.raincoat.util
 
+import dev.uten2c.raincoat.States
 import dev.uten2c.raincoat.States.isOnServer
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener
 import dev.uten2c.raincoat.zoom.ZoomLevel
@@ -19,6 +20,7 @@ object StackUtils {
     private const val GUI_STACK = "GuiStack"
     private const val GUN_STATE = "GunState"
     private const val GUN_MODEL_STATE = "GunModelState"
+    private const val GUN_RECOIL_MODEL_STATE = "GunRecoilModelState"
     private const val ZOOM_LEVEL = "ZoomLevel"
 
     @JvmStatic
@@ -80,7 +82,8 @@ object StackUtils {
     @JvmStatic
     fun getGunModelState(stack: ItemStack): Int {
         val nbt = stack.getSubNbt(NAMESPACE) ?: return -1
-        return nbt.getInt(GUN_MODEL_STATE)
+        val stateTagKey = if (States.isRecoiling) GUN_RECOIL_MODEL_STATE else GUN_MODEL_STATE
+        return nbt.getInt(stateTagKey)
     }
 
     @JvmStatic

@@ -6,6 +6,8 @@ import dev.uten2c.raincoat.Protocol
 import dev.uten2c.raincoat.States
 import dev.uten2c.raincoat.option.OptionManager
 import dev.uten2c.raincoat.util.PacketId
+import dev.uten2c.raincoat.util.StackUtils
+import kotlinx.coroutines.*
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
@@ -18,12 +20,14 @@ import java.util.function.Consumer
 
 object Networking {
     private val LOGGER = LoggerFactory.getLogger("Raincoat Networking")
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     fun registerListeners() {
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> States.reset() }
         registerReceiver(Protocol.HANDSHAKE_REQUEST) { _, _, _, _ -> onHandshakeRequest() }
         registerReceiver(Protocol.DIRECTION_SEND_REQUEST) { _, _, buf, _ -> onDirectionSendRequest(buf) }
-        registerReceiver(Protocol.RECOIL) { client, _, buf, _ -> onRecoil(client, buf) }
+        registerReceiver(Protocol.RECOIL_CAMERA) { client, _, buf, _ -> onCameraRecoil(client, buf) }
+        registerReceiver(Protocol.RECOIL_ANIMATION) { client, _, buf, _ -> onRecoilAnimation(client, buf) }
         registerReceiver(Protocol.OUTDATED) { _, _, _, _ -> onOutdatedSignal() }
     }
 
@@ -49,13 +53,27 @@ object Networking {
         }
     }
 
-    private fun onRecoil(client: MinecraftClient, buf: PacketByteBuf) {
+    private fun onCameraRecoil(client: MinecraftClient, buf: PacketByteBuf) {
         val x = buf.readFloat()
         val y = buf.readFloat()
         val player = client.player
         if (player != null) {
             player.yaw = player.yaw + x
             player.pitch = player.pitch + y
+        }
+    }
+
+    private fun onRecoilAnimation(client: MinecraftClient, buf: PacketByteBuf) {
+        val ticks = buf.readVarInt()
+        val player = client.player ?: return
+        val stack = player.mainHandStack
+        if (!StackUtils.isGun(stack)) {
+            return
+        }
+        States.isRecoiling = true
+        scope.launch {
+            delay(50L * ticks)
+            States.isRecoiling = false
         }
     }
 
