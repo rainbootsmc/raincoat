@@ -8,7 +8,7 @@ jobs:
   publish:
     permissions:
       contents: write
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci-skip')"
     steps:
       - uses: actions/checkout@v3
