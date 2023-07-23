@@ -12,13 +12,19 @@ import net.minecraft.util.math.RotationAxis;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(GameRenderer.class)
 public abstract class MixinGameRenderer {
+    @Unique
     private long lastNoBobbingTime = 0L;
+
+    @Unique
     private float lastScale = 0L;
+
+    @Unique
     private static final int MARGIN_MILLIS = 50;
 
     @Shadow
@@ -35,7 +41,8 @@ public abstract class MixinGameRenderer {
             var mainHandStack = player.getMainHandStack();
             var gunState = StackUtils.getGunState(mainHandStack);
 
-            var gunModelState = StackUtils.getGunModelState(mainHandStack);
+            final var isFirstPerson = client.options.getPerspective().isFirstPerson();
+            var gunModelState = StackUtils.getGunModelState(isFirstPerson, mainHandStack);
             var targetScale = StackUtils.getGunModelScale(gunModelState);
 
             if (gunState == GunState.ADS || System.currentTimeMillis() - lastNoBobbingTime <= MARGIN_MILLIS) {

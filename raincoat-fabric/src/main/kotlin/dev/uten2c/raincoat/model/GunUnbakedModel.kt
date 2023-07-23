@@ -47,11 +47,11 @@ class GunUnbakedModel(private val gunModel: GunModel) : UnbakedModel {
         }
 
         @JvmStatic
-        fun getOrCreateModel(stack: ItemStack, model: GunBakedModel): BakedModel? {
+        fun getOrCreateModel(isFirstPerson: Boolean, stack: ItemStack, model: GunBakedModel): BakedModel? {
             if (stack.isEmpty) {
                 return null
             }
-            val gunModelState = StackUtils.getGunModelState(stack)
+            val gunModelState = StackUtils.getGunModelState(isFirstPerson, stack)
             if (gunModelState == -1) {
                 return null
             }

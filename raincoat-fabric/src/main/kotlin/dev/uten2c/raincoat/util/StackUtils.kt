@@ -80,9 +80,9 @@ object StackUtils {
     }
 
     @JvmStatic
-    fun getGunModelState(stack: ItemStack): Int {
+    fun getGunModelState(firstPerson: Boolean, stack: ItemStack): Int {
         val nbt = stack.getSubNbt(NAMESPACE) ?: return -1
-        val stateTagKey = if (States.isRecoiling) GUN_RECOIL_MODEL_STATE else GUN_MODEL_STATE
+        val stateTagKey = if (firstPerson && States.isRecoiling) GUN_RECOIL_MODEL_STATE else GUN_MODEL_STATE
         return nbt.getInt(stateTagKey)
     }
 

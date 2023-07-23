@@ -2,6 +2,7 @@ package dev.uten2c.raincoat.mixin.render;
 
 import dev.uten2c.raincoat.model.GunBakedModel;
 import dev.uten2c.raincoat.model.GunUnbakedModel;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.entity.LivingEntity;
@@ -18,7 +19,9 @@ public class MixinItemRenderer {
     private void changeGunModel(ItemStack stack, World world, LivingEntity entity, int seed, CallbackInfoReturnable<BakedModel> cir) {
         final var model = cir.getReturnValue();
         if (model instanceof GunBakedModel rainModel) {
-            final var bakedModel = GunUnbakedModel.getOrCreateModel(stack, rainModel);
+            final var isFirstPerson = MinecraftClient.getInstance().options.getPerspective().isFirstPerson();
+            final var isFirstPersonModel = MinecraftClient.getInstance().cameraEntity == entity && isFirstPerson;
+            final var bakedModel = GunUnbakedModel.getOrCreateModel(isFirstPersonModel, stack, rainModel);
             if (bakedModel != null) {
                 cir.setReturnValue(bakedModel);
             }
