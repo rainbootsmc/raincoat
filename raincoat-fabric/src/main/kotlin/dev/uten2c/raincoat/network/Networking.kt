@@ -13,9 +13,13 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.screen.ConfirmLinkScreen
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
+import net.minecraft.util.Util
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.function.Consumer
 
 object Networking {
@@ -29,6 +33,7 @@ object Networking {
         registerReceiver(Protocol.RECOIL_CAMERA) { client, _, buf, _ -> onCameraRecoil(client, buf) }
         registerReceiver(Protocol.RECOIL_ANIMATION) { client, _, buf, _ -> onRecoilAnimation(client, buf) }
         registerReceiver(Protocol.OUTDATED) { _, _, _, _ -> onOutdatedSignal() }
+        registerReceiver(Protocol.OPEN_URL) { client, _, buf, _ -> onOpenUrl(client, buf) }
     }
 
     private fun onHandshakeRequest() {
@@ -79,6 +84,36 @@ object Networking {
 
     private fun onOutdatedSignal() {
         States.reset()
+    }
+
+    private fun onOpenUrl(client: MinecraftClient, buf: PacketByteBuf) {
+        try {
+            val currentScreen = client.currentScreen
+            val urlString = buf.readString()
+            val trusted = buf.readBoolean()
+            val uri = URI(urlString)
+            if (client.options.chatLinksPrompt.value) {
+                client.execute {
+                    val confirmScreen = ConfirmLinkScreen(
+                        { open -> confirmOpenLink(client, currentScreen, open, uri) },
+                        urlString,
+                        trusted,
+                    )
+                    client.setScreen(confirmScreen)
+                }
+            } else {
+                Util.getOperatingSystem().open(uri)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun confirmOpenLink(client: MinecraftClient, parentScreen: Screen?, open: Boolean, uri: URI) {
+        if (open) {
+            Util.getOperatingSystem().open(uri)
+        }
+        client.setScreen(parentScreen)
     }
 
     @JvmStatic
