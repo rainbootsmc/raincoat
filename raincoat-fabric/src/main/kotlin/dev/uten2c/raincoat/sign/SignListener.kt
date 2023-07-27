@@ -87,6 +87,7 @@ object SignListener {
         }
 
         val entity = ItemDisplayEntity(EntityType.ITEM_DISPLAY, world).also {
+            it.id += 1000000
             val stack = Items.RED_DYE.defaultStack.also { nbt ->
                 nbt.orCreateNbt.putInt("CustomModelData", signObject.ids.first())
             }
