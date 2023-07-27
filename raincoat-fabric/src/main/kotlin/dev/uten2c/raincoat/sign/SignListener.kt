@@ -5,22 +5,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.block.Block
 import net.minecraft.block.Blocks
-import net.minecraft.block.SignBlock
-import net.minecraft.block.WallSignBlock
 import net.minecraft.block.entity.SignBlockEntity
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.render.model.json.ModelTransformationMode
 import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityType
-import net.minecraft.entity.decoration.DisplayEntity.ItemDisplayEntity
-import net.minecraft.item.Items
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.RotationPropertyHelper
 import net.minecraft.world.World
 import java.util.concurrent.ConcurrentHashMap
 
@@ -76,7 +67,6 @@ object SignListener {
 
     private fun updateEntity(blockEntity: SignBlockEntity, world: World) {
         val frontText = blockEntity.frontText
-
         val texts = frontText.getMessages(false).map(Text::getString)
         val signObject = parseSignObject(texts)
         if (signObject == null) {
@@ -85,35 +75,6 @@ object SignListener {
         } else {
             signObjectMap[blockEntity] = signObject
         }
-
-        val entity = ItemDisplayEntity(EntityType.ITEM_DISPLAY, world).also {
-            it.id += 1000000
-            val stack = Items.RED_DYE.defaultStack.also { nbt ->
-                nbt.orCreateNbt.putInt("CustomModelData", signObject.ids.first())
-            }
-            it.setItemStack(stack)
-            it.setTransformationMode(ModelTransformationMode.HEAD)
-        }
-        val pos = blockEntity.pos
-        val state = blockEntity.cachedState
-        val deg = if (state.contains(WallSignBlock.FACING)) {
-            val direction = state.get(WallSignBlock.FACING)
-            val rotation = RotationPropertyHelper.fromDirection(direction)
-            RotationPropertyHelper.toDegrees(rotation)
-        } else {
-            RotationPropertyHelper.toDegrees(state.get(SignBlock.ROTATION))
-        }
-        entity.yaw = deg
-        entity.setPosition(pos.toCenterPos())
-        val client = MinecraftClient.getInstance()
-        val networkHandler = client.networkHandler ?: return
-
-        if (blockEntity !in entityMap) {
-            entityMap[blockEntity] = entity
-            networkHandler.onEntitySpawn(EntitySpawnS2CPacket(entity))
-        }
-
-        networkHandler.onEntityTrackerUpdate(EntityTrackerUpdateS2CPacket(entity.id, entity.dataTracker.entries.values.map { it.toSerialized() }.toMutableList()))
     }
 
     private fun parseSignObject(texts: List<String>): SignObject? {
