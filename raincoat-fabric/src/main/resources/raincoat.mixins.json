@@ -18,9 +18,11 @@
     "render.MixinHeldItemFeatureRenderer",
     "render.MixinItemRenderer",
     "render.MixinPlayerEntityRenderer",
+    "render.block.entity.MixinSignBlockEntityRenderer",
     "updater.MixinTitleScreen"
   ],
   "mixins": [
+    "block.MixinAbstractSignBlock"
   ],
   "injectors": {
     "defaultRequire": 1
