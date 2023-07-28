@@ -7,7 +7,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.WoodType;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.block.entity.SignBlockEntityRenderer;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -44,5 +46,38 @@ public class MixinSignBlockEntityRenderer {
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-yaw + 180));
         itemRenderer$raincoat.renderItem(signObject.getItemStack(), ModelTransformationMode.HEAD, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
         matrices.pop();
+
+        if (signObject.getBbShow()) {
+            matrices.push();
+            matrices.translate(0.5, 0.5, 0.5);
+            final var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
+            if (yaw % 90 == 0) {
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-yaw + 180));
+                final var bbStart = signObject.getBbStart();
+                final var bbEnd = signObject.getBbEnd();
+                final var x1 = Math.min(bbStart.x, bbEnd.x);
+                final var y1 = Math.min(bbStart.y, bbEnd.y);
+                final var z1 = Math.min(bbStart.z, bbEnd.z);
+                final var x2 = Math.max(bbStart.x, bbEnd.x);
+                final var y2 = Math.max(bbStart.y, bbEnd.y);
+                final var z2 = Math.max(bbStart.z, bbEnd.z);
+                WorldRenderer.drawBox(
+                        matrices, vertexConsumer,
+                        x1, y1, z1,
+                        x2, y2, z2,
+                        1f, 1f, 1f, 1f,
+                        0f, 0f, 0f
+                );
+            } else {
+                WorldRenderer.drawBox(
+                        matrices, vertexConsumer,
+                        -0.5, -0.5, -0.5,
+                        0.5, 0.5, 0.5,
+                        1f, 1f, 1f, 1f,
+                        0f, 0f, 0f
+                );
+            }
+            matrices.pop();
+        }
     }
 }

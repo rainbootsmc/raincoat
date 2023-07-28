@@ -12,6 +12,7 @@ import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import java.util.concurrent.ConcurrentHashMap
 
@@ -67,7 +68,11 @@ object SignListener {
 
     private fun updateEntity(blockEntity: SignBlockEntity, world: World) {
         val frontText = blockEntity.frontText
-        val texts = frontText.getMessages(false).map(Text::getString)
+        val frontTexts = frontText.getMessages(false).map(Text::getString)
+        val backTexts = blockEntity.backText.getMessages(false).map(Text::getString)
+        val texts = mutableListOf<String>()
+        texts.addAll(frontTexts)
+        texts.addAll(backTexts)
         val signObject = parseSignObject(texts)
         if (signObject == null) {
             signObjectMap.remove(blockEntity)
@@ -85,16 +90,30 @@ object SignListener {
         val ids = parseModelIds(texts[1]) ?: return null
         var tableId: String? = null
         var replaceBlock: Block? = null
-        listOf(texts[2], texts[3]).forEach { text ->
-            when {
-                text.startsWith("t/") -> tableId = text.drop(2)
-                text.startsWith("b/") -> {
-                    val blockId = text.drop(2)
-                    replaceBlock = Registries.BLOCK.get(Identifier(blockId))
+        var bbStart: Vec3d? = null
+        var bbEnd: Vec3d? = null
+        var bbDisplay = false
+        texts.drop(2)
+            .map { it.split("/") }
+            .filter { it.size == 2 }
+            .map { it[0] to it[1] }
+            .forEach { (key, value) ->
+                when (key) {
+                    "t" -> tableId = value
+                    "b" -> replaceBlock = Registries.BLOCK.get(Identifier(value))
+                    "bbs" -> bbStart = parseVec3d(value)
+                    "bbe" -> bbEnd = parseVec3d(value)
+                    "bbd" -> bbDisplay = value.toBooleanStrictOrNull() ?: false
                 }
             }
-        }
-        return SignObject(ids, replaceBlock ?: Blocks.BARRIER, tableId)
+        return SignObject(
+            ids,
+            replaceBlock ?: Blocks.BARRIER,
+            tableId,
+            bbStart ?: Vec3d(-0.5, -0.5, -0.5),
+            bbEnd ?: Vec3d(0.5, 0.5, 0.5),
+            bbDisplay,
+        )
     }
 
     private fun parseModelIds(string: String): List<Int>? {
@@ -111,6 +130,15 @@ object SignListener {
     @JvmStatic
     fun getCachedSignObject(blockEntity: SignBlockEntity): SignObject? {
         return signObjectMap[blockEntity]
+    }
+
+    private fun parseVec3d(string: String): Vec3d? {
+        val values = string.split(",")
+            .map { it.toDoubleOrNull() }
+        if (null in values || values.size != 3) {
+            return null
+        }
+        return Vec3d(values[0]!!, values[1]!!, values[2]!!)
     }
 
     private data class SignLoadContext(val blockEntity: SignBlockEntity, val world: World)
