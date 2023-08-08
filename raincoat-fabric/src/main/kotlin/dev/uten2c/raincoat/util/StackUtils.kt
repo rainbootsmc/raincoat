@@ -3,8 +3,12 @@ package dev.uten2c.raincoat.util
 import dev.uten2c.raincoat.States
 import dev.uten2c.raincoat.States.isOnServer
 import dev.uten2c.raincoat.resource.ScaleMapReloadListener
+import dev.uten2c.raincoat.sign.SignObjectUtils
 import dev.uten2c.raincoat.zoom.ZoomLevel
+import net.minecraft.block.entity.SignText
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NbtOps
+import net.minecraft.registry.tag.ItemTags
 import net.minecraft.text.Text
 import net.minecraft.text.TextContent
 
@@ -121,6 +125,11 @@ object StackUtils {
 
     @JvmStatic
     fun swapGuiStack(stack: ItemStack): ItemStack {
+        val signGuiStack = getSignGuiStack(stack)
+        if (signGuiStack != null) {
+            return signGuiStack
+        }
+
         if (!isOnServer) {
             return stack
         }
@@ -132,5 +141,26 @@ object StackUtils {
             return stack
         }
         return guiStack
+    }
+
+    private fun getSignGuiStack(stack: ItemStack): ItemStack? {
+        if (!stack.isIn(ItemTags.SIGNS) && !stack.isIn(ItemTags.HANGING_SIGNS)) {
+            return null
+        }
+        val nbt = stack.nbt ?: return null
+        val signTags = nbt.getCompound("BlockEntityTag") ?: return null
+        val texts = mutableListOf<Text>()
+        if (signTags.contains("front_text")) {
+            SignText.CODEC.parse(NbtOps.INSTANCE, signTags.getCompound("front_text"))
+                .result()
+                .ifPresent { texts.addAll(it.getMessages(false)) }
+        }
+        if (signTags.contains("back_text")) {
+            SignText.CODEC.parse(NbtOps.INSTANCE, signTags.getCompound("back_text"))
+                .result()
+                .ifPresent { texts.addAll(it.getMessages(false)) }
+        }
+        val signObject = SignObjectUtils.parse(texts.map(Text::getString)) ?: return null
+        return signObject.itemStack
     }
 }
