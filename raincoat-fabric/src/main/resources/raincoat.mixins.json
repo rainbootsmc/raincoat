@@ -22,7 +22,9 @@
     "updater.MixinTitleScreen"
   ],
   "mixins": [
-    "block.MixinAbstractSignBlock"
+    "block.MixinAbstractSignBlock",
+    "block.entity.MixinHangingSignBlockEntity",
+    "block.entity.MixinSignBlockEntity"
   ],
   "injectors": {
     "defaultRequire": 1
