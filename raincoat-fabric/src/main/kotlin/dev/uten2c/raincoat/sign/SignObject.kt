@@ -12,6 +12,7 @@ data class SignObject(
     val bbStart: Vec3d,
     val bbEnd: Vec3d,
     val bbShow: Boolean,
+    val offset: Vec3d,
 ) {
     val itemStack: ItemStack by lazy {
         Items.RED_DYE.defaultStack.also { nbt ->

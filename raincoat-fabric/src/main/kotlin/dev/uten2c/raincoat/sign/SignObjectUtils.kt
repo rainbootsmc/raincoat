@@ -1,5 +1,6 @@
 package dev.uten2c.raincoat.sign
 
+import dev.uten2c.raincoat.resource.FieldObjectReloadListener
 import net.minecraft.block.*
 import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
@@ -7,6 +8,7 @@ import net.minecraft.util.math.RotationPropertyHelper
 import net.minecraft.util.math.Vec3d
 
 object SignObjectUtils {
+
     @JvmStatic
     fun getYaw(state: BlockState): Float {
         return if (state.contains(WallSignBlock.FACING)) {
@@ -29,6 +31,7 @@ object SignObjectUtils {
         var bbStart: Vec3d? = null
         var bbEnd: Vec3d? = null
         var bbDisplay = false
+        var offset: Vec3d? = null
         texts.drop(2)
             .map { it.split("/") }
             .filter { it.size == 2 }
@@ -40,6 +43,7 @@ object SignObjectUtils {
                     "bbs" -> bbStart = parseVec3d(value)
                     "bbe" -> bbEnd = parseVec3d(value)
                     "bbd" -> bbDisplay = value.toBooleanStrictOrNull() ?: false
+                    "o" -> offset = parseVec3d(value)
                 }
             }
         return SignObject(
@@ -49,12 +53,19 @@ object SignObjectUtils {
             bbStart ?: Vec3d(-0.5, -0.5, -0.5),
             bbEnd ?: Vec3d(0.5, 0.5, 0.5),
             bbDisplay,
+            offset ?: Vec3d(0.0, 0.0, 0.0)
         )
     }
 
     private fun parseModelIds(string: String): List<Int>? {
         val idOrNullList = string.split("/")
-            .map { it.toIntOrNull() }
+            .map {
+                if (it.toIntOrNull() == null) {
+                    FieldObjectReloadListener.idMap[it]
+                } else {
+                    it.toInt()
+                }
+            }
 
         if (null in idOrNullList) {
             return null

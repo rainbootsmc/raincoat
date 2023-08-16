@@ -16,6 +16,8 @@ import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
+import org.joml.Quaterniond;
+import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,10 +42,16 @@ public class MixinSignBlockEntityRenderer {
         }
         ci.cancel();
 
-        final var yaw = SignObjectUtils.getYaw(entity.getCachedState());
+        final var rotation = SignObjectUtils.getYaw(entity.getCachedState()) * -1 + 180;
+        final var offset = signObject.getOffset();
+        final var localOffset = new Vector3d(offset.x, offset.y, offset.z);
+        final var quaternion = new Quaterniond();
+        quaternion.rotateY(Math.toRadians(rotation));
+        quaternion.transform(localOffset);
+
         matrices.push();
-        matrices.translate(0.5, 0.5, 0.5);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-yaw + 180));
+        matrices.translate(localOffset.x + 0.5f, localOffset.y + 0.5f, localOffset.z + 0.5f);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
         itemRenderer$raincoat.renderItem(signObject.getItemStack(), ModelTransformationMode.HEAD, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
         matrices.pop();
 
@@ -51,8 +59,8 @@ public class MixinSignBlockEntityRenderer {
             matrices.push();
             matrices.translate(0.5, 0.5, 0.5);
             final var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
-            if (yaw % 90 == 0) {
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-yaw + 180));
+            if (rotation % 90 == 0) {
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
                 final var bbStart = signObject.getBbStart();
                 final var bbEnd = signObject.getBbEnd();
                 final var x1 = Math.min(bbStart.x, bbEnd.x);
