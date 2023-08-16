@@ -1,10 +1,7 @@
 package dev.uten2c.raincoat.mixin.block;
 
 import dev.uten2c.raincoat.sign.SignListener;
-import net.minecraft.block.AbstractSignBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
@@ -15,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AbstractSignBlock.class)
-public abstract class MixinAbstractSignBlock extends BlockWithEntity {
-    protected MixinAbstractSignBlock(Settings settings) {
-        super(settings);
+@Mixin(HangingSignBlock.class)
+public abstract class MixinHangingSignBlock extends AbstractSignBlock {
+    protected MixinHangingSignBlock(Settings settings, WoodType type) {
+        super(settings, type);
     }
 
     @Inject(method = "getOutlineShape", at = @At("HEAD"), cancellable = true)
@@ -27,18 +24,5 @@ public abstract class MixinAbstractSignBlock extends BlockWithEntity {
         if (blockEntity instanceof SignBlockEntity signBlockEntity && SignListener.getCachedSignObject(signBlockEntity) != null) {
             cir.setReturnValue(VoxelShapes.fullCube());
         }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        final var blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof SignBlockEntity signBlockEntity) {
-            final var signObject = SignListener.getCachedSignObject(signBlockEntity);
-            if (signObject != null) {
-                return signObject.getReplaceBlock().getDefaultState().getCollisionShape(world, pos);
-            }
-        }
-        return super.getCollisionShape(state, world, pos, context);
     }
 }

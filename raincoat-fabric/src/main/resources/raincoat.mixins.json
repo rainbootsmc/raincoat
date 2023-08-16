@@ -23,8 +23,12 @@
   ],
   "mixins": [
     "block.MixinAbstractSignBlock",
+    "block.MixinHangingSignBlock",
+    "block.MixinWallSignBlock",
     "block.entity.MixinHangingSignBlockEntity",
-    "block.entity.MixinSignBlockEntity"
+    "block.entity.MixinSignBlockEntity",
+    "block.entity.MixinWallHangingSignBlock",
+    "item.MixinItemGroups"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -13,20 +13,30 @@ import dev.uten2c.raincoat.sign.SignListener
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.resource.ResourceType
+import net.minecraft.util.Identifier
+
 
 class RaincoatMod : ClientModInitializer {
     override fun onInitializeClient() {
         OptionManager.load()
+
         Networking.registerListeners()
         KeyBindings.register()
         DirectionListener.register()
         PingListener.register()
         SignListener.register()
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(FieldObjectReloadListener())
+
+        Registry.register(Registries.ITEM_GROUP, Identifier(MOD_ID, "field_object"), fieldObjectItemGroup)
+
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(FieldObjectReloadListener)
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(ScaleMapReloadListener())
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(RaincoatModelReloadListener())
+
         ModelLoadingRegistry.INSTANCE.registerResourceProvider(::RaincoatModelProvider)
+
     }
 }
 
