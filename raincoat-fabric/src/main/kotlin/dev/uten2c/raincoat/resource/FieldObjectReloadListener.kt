@@ -42,10 +42,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                 if (!shouldShowItemTab) {
                     return@register
                 }
-                idMap.forEach { (id, customModelData) ->
-                    if (customModelData == 1000) {
-                        return@forEach
-                    }
+                itemTabIdMap.forEach { (id, _) ->
                     val messages = arrayOf(Text.of("object"), Text.of(id), ScreenTexts.EMPTY, ScreenTexts.EMPTY)
                     val signText = SignText(messages, messages, DyeColor.BLACK, false)
                     val blockEntityNbt = NbtCompound()
@@ -71,10 +68,15 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
         private set
 
     private var _idMap: MutableMap<String, Int> = HashMap()
+    private var _itemTabIdMap: Map<String, Int> = emptyMap()
 
     @JvmStatic
     val idMap: Map<String, Int>
         get() = _idMap
+
+    @JvmStatic
+    val itemTabIdMap: Map<String, Int>
+        get() = _itemTabIdMap
 
     override fun getFabricId(): Identifier {
         return Identifier(MOD_ID, "field_object")
@@ -89,7 +91,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                 val string = input.readAllBytes().toString(Charsets.UTF_8)
                 val originalModel = JsonUnbakedModel.deserialize(string)
                 val model = FieldObjectUtils.createFieldObjectModel(originalModel)
-                _idMap = model.overrides
+                val map = model.overrides
                     .filter { it.modelId.path.startsWith(BASE_PATH) }
                     .associate {
                         val modelId = pathToId(it.modelId.path)
@@ -101,6 +103,8 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                         modelId to customModelData
                     }
                     .toMutableMap()
+                _idMap = map.toMutableMap()
+                _itemTabIdMap = map.filter { it.value != 1000 }
             }
         }
 
