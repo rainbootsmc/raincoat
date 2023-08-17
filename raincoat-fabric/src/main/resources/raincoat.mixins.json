@@ -19,7 +19,6 @@
     "render.MixinItemRenderer",
     "render.MixinPlayerEntityRenderer",
     "render.block.entity.MixinSignBlockEntityRenderer",
-    "render.model.model.MixinBakedModelManager",
     "updater.MixinTitleScreen"
   ],
   "mixins": [

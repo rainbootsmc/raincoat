@@ -1,10 +1,13 @@
 package dev.uten2c.raincoat.resource
 
+import dev.uten2c.raincoat.MINECRAFT
 import dev.uten2c.raincoat.MOD_ID
 import dev.uten2c.raincoat.fieldObjectItemGroup
 import dev.uten2c.raincoat.shouldUpdateCreativeTab
 import dev.uten2c.raincoat.util.FieldObjectUtils
 import kotlinx.serialization.json.Json
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin
+import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener
 import net.minecraft.block.entity.SignText
@@ -22,6 +25,7 @@ import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.DyeColor
 import net.minecraft.util.Identifier
+import java.util.concurrent.CompletableFuture
 import kotlin.jvm.optionals.getOrDefault
 
 object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
@@ -29,6 +33,10 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
     private const val BASE_PATH = "rainboots/block/"
 
     init {
+        PreparableModelLoadingPlugin.register(
+            { _, _ -> CompletableFuture.completedFuture(null) },
+            { _, ctx -> loadFieldObjectParent(ctx) },
+        )
         Registries.ITEM_GROUP.getKey(fieldObjectItemGroup).ifPresent { registryKey ->
             ItemGroupEvents.modifyEntriesEvent(registryKey).register { content ->
                 if (!shouldShowItemTab) {
@@ -84,9 +92,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                 _idMap = model.overrides
                     .filter { it.modelId.path.startsWith(BASE_PATH) }
                     .associate {
-                        val modelId = it.modelId.path
-                            .replace(BASE_PATH, "")
-                            .replace("/", "_")
+                        val modelId = pathToId(it.modelId.path)
                         val customModelData = it.streamConditions()
                             .filter { c -> c.type.path == "custom_model_data" }
                             .map { c -> c.threshold.toInt() }
@@ -102,7 +108,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
             resource.inputStream.use { input ->
                 kotlin.runCatching {
                     val oldIdMap = Json.decodeFromString<Map<String, String>>(input.readAllBytes().toString(Charsets.UTF_8))
-                    oldIdMap.mapValues { (_, ref) -> _idMap[ref] }
+                    oldIdMap.mapValues { (_, ref) -> _idMap[pathToId(ref)] }
                         .filterValues { it != null }
                         .forEach { (key, value) ->
                             _idMap[key] = value!!
@@ -114,5 +120,21 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
         }
 
         shouldUpdateCreativeTab = true
+    }
+
+    private fun loadFieldObjectParent(pluginContext: ModelLoadingPlugin.Context) {
+        pluginContext.modifyModelOnLoad().register { model, ctx ->
+            val id = ctx.id()
+            if (id.namespace == MINECRAFT && id.path == "red_dye" && model is JsonUnbakedModel) {
+                return@register FieldObjectUtils.createFieldObjectModel(model)
+            }
+            model
+        }
+    }
+
+    private fun pathToId(path: String): String {
+        return path
+            .replace(BASE_PATH, "")
+            .replace("/", "_")
     }
 }
