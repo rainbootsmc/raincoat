@@ -124,7 +124,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
             }
             itemTabIdMap.forEach { (id, _) ->
                 val block = replaceBlock ?: Blocks.BARRIER
-                val replaceBlockText = Text.of("b/${Registries.BLOCK.getId(block).path}")
+                val replaceBlockText = if (replaceBlock == null) ScreenTexts.EMPTY else Text.of("b/${Registries.BLOCK.getId(block).path}")
                 val messages = arrayOf(Text.of("object"), Text.of(id), replaceBlockText, ScreenTexts.EMPTY)
                 val signText = SignText(messages, messages, DyeColor.BLACK, false)
                 val blockEntityNbt = NbtCompound()
