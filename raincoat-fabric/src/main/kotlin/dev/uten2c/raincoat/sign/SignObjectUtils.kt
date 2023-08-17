@@ -25,7 +25,7 @@ object SignObjectUtils {
             return null
         }
 
-        val ids = parseModelIds(texts[1]) ?: return null
+        val parsedIds = parseModelIds(texts[1])
         var tableId: String? = null
         var replaceBlock: Block? = null
         var bbStart: Vec3d? = null
@@ -47,31 +47,28 @@ object SignObjectUtils {
                 }
             }
         return SignObject(
-            ids,
+            parsedIds.ids,
             replaceBlock ?: Blocks.BARRIER,
             tableId,
             bbStart ?: Vec3d(-0.5, -0.5, -0.5),
             bbEnd ?: Vec3d(0.5, 0.5, 0.5),
             bbDisplay,
-            offset ?: Vec3d(0.0, 0.0, 0.0)
-        )
+            offset ?: Vec3d(0.0, 0.0, 0.0),
+            parsedIds.isOldId,
+
+            )
     }
 
-    private fun parseModelIds(string: String): List<Int>? {
-        val idOrNullList = string.split("/")
+    private fun parseModelIds(string: String): ParsedIds {
+        var hasOldId = false
+        val ids = string.split("/")
             .map {
-                if (it.toIntOrNull() == null) {
-                    FieldObjectReloadListener.idMap[it]
-                } else {
-                    it.toInt()
+                if (it.toIntOrNull() != null) {
+                    hasOldId = true
                 }
+                FieldObjectReloadListener.idMap[it] ?: 1000
             }
-
-        if (null in idOrNullList) {
-            return null
-        }
-
-        return idOrNullList.filterNotNull()
+        return ParsedIds(ids, hasOldId)
     }
 
     private fun parseVec3d(string: String): Vec3d? {
@@ -82,4 +79,6 @@ object SignObjectUtils {
         }
         return Vec3d(values[0]!!, values[1]!!, values[2]!!)
     }
+
+    private data class ParsedIds(val ids: List<Int>, val isOldId: Boolean)
 }

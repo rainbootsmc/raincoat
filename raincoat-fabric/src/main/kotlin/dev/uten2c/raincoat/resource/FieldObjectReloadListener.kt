@@ -3,6 +3,8 @@ package dev.uten2c.raincoat.resource
 import dev.uten2c.raincoat.MOD_ID
 import dev.uten2c.raincoat.fieldObjectItemGroup
 import dev.uten2c.raincoat.shouldUpdateCreativeTab
+import dev.uten2c.raincoat.util.FieldObjectUtils
+import kotlinx.serialization.json.Json
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener
 import net.minecraft.block.entity.SignText
@@ -32,7 +34,10 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                 if (!shouldShowItemTab) {
                     return@register
                 }
-                idMap.forEach { (id, _) ->
+                idMap.forEach { (id, customModelData) ->
+                    if (customModelData == 1000) {
+                        return@forEach
+                    }
                     val messages = arrayOf(Text.of("object"), Text.of(id), ScreenTexts.EMPTY, ScreenTexts.EMPTY)
                     val signText = SignText(messages, messages, DyeColor.BLACK, false)
                     val blockEntityNbt = NbtCompound()
@@ -57,9 +62,11 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
     var shouldShowItemTab: Boolean = false
         private set
 
+    private var _idMap: MutableMap<String, Int> = HashMap()
+
     @JvmStatic
-    var idMap: Map<String, Int> = HashMap()
-        private set
+    val idMap: Map<String, Int>
+        get() = _idMap
 
     override fun getFabricId(): Identifier {
         return Identifier(MOD_ID, "field_object")
@@ -72,8 +79,9 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
         manager.getResource(Identifier(MODEL_ITEM_PATH)).ifPresent { resource ->
             resource.inputStream.use { input ->
                 val string = input.readAllBytes().toString(Charsets.UTF_8)
-                val model = JsonUnbakedModel.deserialize(string)
-                idMap = model.overrides
+                val originalModel = JsonUnbakedModel.deserialize(string)
+                val model = FieldObjectUtils.createFieldObjectModel(originalModel)
+                _idMap = model.overrides
                     .filter { it.modelId.path.startsWith(BASE_PATH) }
                     .associate {
                         val modelId = it.modelId.path
@@ -86,6 +94,22 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                             .getOrDefault(0)
                         modelId to customModelData
                     }
+                    .toMutableMap()
+            }
+        }
+
+        manager.getResource(Identifier("raincoat", "oldid.json")).ifPresent { resource ->
+            resource.inputStream.use { input ->
+                kotlin.runCatching {
+                    val oldIdMap = Json.decodeFromString<Map<String, String>>(input.readAllBytes().toString(Charsets.UTF_8))
+                    oldIdMap.mapValues { (_, ref) -> _idMap[ref] }
+                        .filterValues { it != null }
+                        .forEach { (key, value) ->
+                            _idMap[key] = value!!
+                        }
+                }.onFailure {
+                    it.printStackTrace()
+                }
             }
         }
 

@@ -55,6 +55,20 @@ public class MixinSignBlockEntityRenderer {
         itemRenderer$raincoat.renderItem(signObject.getItemStack(), ModelTransformationMode.HEAD, light, overlay, matrices, vertexConsumers, entity.getWorld(), 0);
         matrices.pop();
 
+//        if (signObject.isOldId()) {
+//            matrices.push();
+//            matrices.translate(0.5, 0.5, 0.5);
+//            final var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
+//            WorldRenderer.drawBox(
+//                    matrices, vertexConsumer,
+//                    -0.5, -0.5, -0.5,
+//                    0.5, 0.5, 0.5,
+//                    1f, 0f, 0f, 1f,
+//                    1f, 1f, 1f
+//            );
+//            matrices.pop();
+//        }
+
         if (signObject.getBbShow()) {
             matrices.push();
             matrices.translate(0.5, 0.5, 0.5);
