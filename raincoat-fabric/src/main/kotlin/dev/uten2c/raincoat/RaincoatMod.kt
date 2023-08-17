@@ -29,7 +29,8 @@ class RaincoatMod : ClientModInitializer {
         PingListener.register()
         SignListener.register()
 
-        Registry.register(Registries.ITEM_GROUP, Identifier(MOD_ID, "field_object"), fieldObjectItemGroup)
+        Registry.register(Registries.ITEM_GROUP, Identifier(MOD_ID, "field_object_0_barrier"), fieldObjectItemGroupBarrier)
+        Registry.register(Registries.ITEM_GROUP, Identifier(MOD_ID, "field_object_1_air"), fieldObjectItemGroupAir)
 
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(FieldObjectReloadListener)
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(ScaleMapReloadListener())

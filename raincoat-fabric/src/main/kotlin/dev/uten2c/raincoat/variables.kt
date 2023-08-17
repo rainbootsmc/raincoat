@@ -13,7 +13,12 @@ val modelCbor = Cbor {
 }
 
 var shouldUpdateCreativeTab = false
-val fieldObjectItemGroup: ItemGroup = FabricItemGroup.builder()
-    .icon { Items.WARPED_SIGN.defaultStack }
-    .displayName(Text.of("Field Objects"))
+val fieldObjectItemGroupBarrier: ItemGroup = FabricItemGroup.builder()
+    .icon { Items.BARRIER.defaultStack }
+    .displayName(Text.of("Field Objects (Barrier)"))
+    .build()
+
+val fieldObjectItemGroupAir: ItemGroup = FabricItemGroup.builder()
+    .icon { Items.GLASS.defaultStack }
+    .displayName(Text.of("Field Objects (Air)"))
     .build()

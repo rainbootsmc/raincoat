@@ -1,24 +1,25 @@
 package dev.uten2c.raincoat.resource
 
-import dev.uten2c.raincoat.MINECRAFT
-import dev.uten2c.raincoat.MOD_ID
-import dev.uten2c.raincoat.fieldObjectItemGroup
-import dev.uten2c.raincoat.shouldUpdateCreativeTab
+import dev.uten2c.raincoat.*
 import dev.uten2c.raincoat.util.FieldObjectUtils
 import kotlinx.serialization.json.Json
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener
+import net.minecraft.block.Block
+import net.minecraft.block.Blocks
 import net.minecraft.block.entity.SignText
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.model.json.JsonUnbakedModel
+import net.minecraft.item.ItemGroup
 import net.minecraft.item.Items
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtOps
 import net.minecraft.nbt.NbtString
 import net.minecraft.registry.Registries
+import net.minecraft.registry.RegistryKey
 import net.minecraft.resource.ResourceManager
 import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Style
@@ -37,30 +38,10 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
             { _, _ -> CompletableFuture.completedFuture(null) },
             { _, ctx -> loadFieldObjectParent(ctx) },
         )
-        Registries.ITEM_GROUP.getKey(fieldObjectItemGroup).ifPresent { registryKey ->
-            ItemGroupEvents.modifyEntriesEvent(registryKey).register { content ->
-                if (!shouldShowItemTab) {
-                    return@register
-                }
-                itemTabIdMap.forEach { (id, _) ->
-                    val messages = arrayOf(Text.of("object"), Text.of(id), ScreenTexts.EMPTY, ScreenTexts.EMPTY)
-                    val signText = SignText(messages, messages, DyeColor.BLACK, false)
-                    val blockEntityNbt = NbtCompound()
-                    SignText.CODEC.encodeStart(NbtOps.INSTANCE, signText).resultOrPartial { }.ifPresent { frontText -> blockEntityNbt.put("front_text", frontText) }
-                    SignText.CODEC.encodeStart(NbtOps.INSTANCE, SignText()).resultOrPartial { }.ifPresent { backText -> blockEntityNbt.put("back_text", backText) }
-                    blockEntityNbt.putBoolean("is_waxed", false)
-
-                    val lore = NbtList().also { list ->
-                        list.add(NbtString.of("\"(+NBT)\""))
-                    }
-                    val stack = Items.WARPED_SIGN.defaultStack
-                    stack.setCustomName(Text.literal(id).setStyle(Style.EMPTY.withItalic(false)))
-                    stack.orCreateNbt.put("BlockEntityTag", blockEntityNbt)
-                    stack.getOrCreateSubNbt("display").put("Lore", lore)
-                    content.add(stack)
-                }
-            }
-        }
+        val barrierGroup = Registries.ITEM_GROUP.getKey(fieldObjectItemGroupBarrier).get()
+        val airGroup = Registries.ITEM_GROUP.getKey(fieldObjectItemGroupAir).get()
+        registerGroup(barrierGroup, null)
+        registerGroup(airGroup, Blocks.AIR)
     }
 
     @JvmStatic
@@ -133,6 +114,37 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                 return@register FieldObjectUtils.createFieldObjectModel(model)
             }
             model
+        }
+    }
+
+    private fun registerGroup(groupKey: RegistryKey<ItemGroup>, replaceBlock: Block?) {
+        ItemGroupEvents.modifyEntriesEvent(groupKey).register { content ->
+            if (!shouldShowItemTab) {
+                return@register
+            }
+            itemTabIdMap.forEach { (id, _) ->
+                val block = replaceBlock ?: Blocks.BARRIER
+                val replaceBlockText = Text.of("b/${Registries.BLOCK.getId(block).path}")
+                val messages = arrayOf(Text.of("object"), Text.of(id), replaceBlockText, ScreenTexts.EMPTY)
+                val signText = SignText(messages, messages, DyeColor.BLACK, false)
+                val blockEntityNbt = NbtCompound()
+                SignText.CODEC.encodeStart(NbtOps.INSTANCE, signText).resultOrPartial { }.ifPresent { frontText -> blockEntityNbt.put("front_text", frontText) }
+                SignText.CODEC.encodeStart(NbtOps.INSTANCE, SignText()).resultOrPartial { }.ifPresent { backText -> blockEntityNbt.put("back_text", backText) }
+                blockEntityNbt.putBoolean("is_waxed", false)
+
+                val lore = NbtList().also { list ->
+                    list.add(NbtString.of("\"(+NBT)\""))
+                }
+                val stack = Items.WARPED_SIGN.defaultStack
+                val name = Text.literal(id).setStyle(Style.EMPTY.withItalic(false))
+                    .append(Text.of(" ("))
+                    .append(Text.translatable(block.translationKey))
+                    .append(Text.of(")"))
+                stack.setCustomName(name)
+                stack.orCreateNbt.put("BlockEntityTag", blockEntityNbt)
+                stack.getOrCreateSubNbt("display").put("Lore", lore)
+                content.add(stack)
+            }
         }
     }
 
