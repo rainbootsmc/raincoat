@@ -1,7 +1,7 @@
 package dev.uten2c.raincoat.resource
 
+import com.mojang.datafixers.util.Either
 import dev.uten2c.raincoat.*
-import dev.uten2c.raincoat.util.FieldObjectUtils
 import kotlinx.serialization.json.Json
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin
@@ -12,6 +12,9 @@ import net.minecraft.block.Blocks
 import net.minecraft.block.entity.SignText
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.model.json.JsonUnbakedModel
+import net.minecraft.client.render.model.json.ModelOverride
+import net.minecraft.client.render.model.json.ModelTransformation
+import net.minecraft.client.util.SpriteIdentifier
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.Items
 import net.minecraft.nbt.NbtCompound
@@ -21,23 +24,23 @@ import net.minecraft.nbt.NbtString
 import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryKey
 import net.minecraft.resource.ResourceManager
+import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.DyeColor
 import net.minecraft.util.Identifier
 import java.util.concurrent.CompletableFuture
-import kotlin.jvm.optionals.getOrDefault
+import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.jvm.optionals.getOrNull
 
 object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
-    private const val MODEL_ITEM_PATH = "models/item/red_dye.json"
     private const val BASE_PATH = "rainboots/block/"
 
     init {
-        PreparableModelLoadingPlugin.register(
-            { _, _ -> CompletableFuture.completedFuture(null) },
-            { _, ctx -> loadFieldObjectParent(ctx) },
-        )
+        PreparableModelLoadingPlugin.register(::loadFieldObjects, ::replaceModel)
+
         val barrierGroup = Registries.ITEM_GROUP.getKey(fieldObjectItemGroupBarrier).get()
         val airGroup = Registries.ITEM_GROUP.getKey(fieldObjectItemGroupAir).get()
         registerGroup(barrierGroup, null)
@@ -49,7 +52,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
         private set
 
     private var _idMap: MutableMap<String, Int> = HashMap()
-    private var _itemTabIdMap: Map<String, Int> = emptyMap()
+    private var _itemTabIdMap: MutableMap<String, Int> = HashMap()
 
     @JvmStatic
     val idMap: Map<String, Int>
@@ -66,28 +69,6 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
     override fun reload(manager: ResourceManager) {
         shouldShowItemTab = MinecraftClient.getInstance().resourcePackManager.enabledProfiles
             .any { it.name != "server" && it.description.contains(Text.of("RainbootsMC.net")) }
-
-        manager.getResource(Identifier(MODEL_ITEM_PATH)).ifPresent { resource ->
-            resource.inputStream.use { input ->
-                val string = input.readAllBytes().toString(Charsets.UTF_8)
-                val originalModel = JsonUnbakedModel.deserialize(string)
-                val model = FieldObjectUtils.createFieldObjectModel(originalModel)
-                val map = model.overrides
-                    .filter { it.modelId.path.startsWith(BASE_PATH) }
-                    .associate {
-                        val modelId = pathToId(it.modelId.path)
-                        val customModelData = it.streamConditions()
-                            .filter { c -> c.type.path == "custom_model_data" }
-                            .map { c -> c.threshold.toInt() }
-                            .findFirst()
-                            .getOrDefault(0)
-                        modelId to customModelData
-                    }
-                    .toMutableMap()
-                _idMap = map.toMutableMap()
-                _itemTabIdMap = map.filter { it.value != 1000 }
-            }
-        }
 
         manager.getResource(Identifier("raincoat", "oldid.json")).ifPresent { resource ->
             resource.inputStream.use { input ->
@@ -107,13 +88,61 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
         shouldUpdateCreativeTab = true
     }
 
-    private fun loadFieldObjectParent(pluginContext: ModelLoadingPlugin.Context) {
+    private fun loadFieldObjects(resourceManager: ResourceManager, executor: Executor): CompletableFuture<List<String>?> {
+        return CompletableFuture.supplyAsync(
+            {
+                val resource = resourceManager.getResource(Identifier("field_objects.txt")).getOrNull() ?: return@supplyAsync null
+                resource.inputStream.use { input ->
+                    input.bufferedReader()
+                        .readLines()
+                        .filter { it.isNotEmpty() && it.first() != '#' }
+                }
+            },
+            executor,
+        )
+    }
+
+    private fun replaceModel(fieldObjectList: List<String>?, pluginContext: ModelLoadingPlugin.Context) {
+        if (fieldObjectList == null) {
+            return
+        }
         pluginContext.modifyModelOnLoad().register { model, ctx ->
             val id = ctx.id()
-            if (id.namespace == MINECRAFT && id.path == "red_dye" && model is JsonUnbakedModel) {
-                return@register FieldObjectUtils.createFieldObjectModel(model)
+            if (id.namespace != MINECRAFT || id.path != "red_dye") {
+                return@register model
             }
-            model
+            val atomicId = AtomicInteger(1000)
+            _idMap = mutableMapOf()
+            _itemTabIdMap = mutableMapOf()
+
+            val overrides = mutableListOf<ModelOverride>()
+            val missingModelCustomModelData = atomicId.getAndIncrement()
+            _idMap["missing"] = missingModelCustomModelData
+            overrides.add(
+                ModelOverride(
+                    Identifier("rainboots/block/missing"),
+                    listOf(ModelOverride.Condition(Identifier("custom_model_data"), missingModelCustomModelData.toFloat()))
+                )
+            )
+
+            fieldObjectList.forEach { modelId ->
+                val customModelData = atomicId.getAndIncrement()
+                val condition = ModelOverride.Condition(Identifier("custom_model_data"), customModelData.toFloat())
+                val override = ModelOverride(Identifier(modelId), listOf(condition))
+                overrides.add(override)
+                _idMap[pathToId(modelId)] = customModelData
+                _itemTabIdMap[pathToId(modelId)] = customModelData
+            }
+
+            JsonUnbakedModel(
+                Identifier("item/generated"),
+                emptyList(),
+                mapOf("layer0" to Either.left(SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier("item/red_dye")))),
+                null,
+                null,
+                ModelTransformation.NONE,
+                overrides,
+            )
         }
     }
 
