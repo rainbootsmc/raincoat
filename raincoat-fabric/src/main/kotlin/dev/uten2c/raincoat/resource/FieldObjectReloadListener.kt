@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
 
 object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
-    private const val BASE_PATH = "rainboots/block/"
+    private const val BASE_PATH = "rainboots/block"
 
     init {
         PreparableModelLoadingPlugin.register(::loadFieldObjects, ::replaceModel)
@@ -72,7 +72,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
 
         manager.getResource(Identifier("raincoat", "oldid.json")).ifPresent { resource ->
             resource.inputStream.use { input ->
-                kotlin.runCatching {
+                runCatching {
                     val oldIdMap = Json.decodeFromString<Map<String, String>>(input.readAllBytes().toString(Charsets.UTF_8))
                     oldIdMap.mapValues { (_, ref) -> _idMap[pathToId(ref)] }
                         .filterValues { it != null }
@@ -120,7 +120,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
             _idMap["missing"] = missingModelCustomModelData
             overrides.add(
                 ModelOverride(
-                    Identifier("rainboots/block/missing"),
+                    Identifier("$BASE_PATH/missing"),
                     listOf(ModelOverride.Condition(Identifier("custom_model_data"), missingModelCustomModelData.toFloat()))
                 )
             )
@@ -128,7 +128,7 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
             fieldObjectList.forEach { modelId ->
                 val customModelData = atomicId.getAndIncrement()
                 val condition = ModelOverride.Condition(Identifier("custom_model_data"), customModelData.toFloat())
-                val override = ModelOverride(Identifier(modelId), listOf(condition))
+                val override = ModelOverride(Identifier("$BASE_PATH/$modelId"), listOf(condition))
                 overrides.add(override)
                 _idMap[pathToId(modelId)] = customModelData
                 _itemTabIdMap[pathToId(modelId)] = customModelData
@@ -178,8 +178,6 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
     }
 
     private fun pathToId(path: String): String {
-        return path
-            .replace(BASE_PATH, "")
-            .replace("/", "_")
+        return path.replace("/", "_")
     }
 }
