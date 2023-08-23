@@ -69,6 +69,29 @@ public class MixinSignBlockEntityRenderer {
 //            matrices.pop();
 //        }
 
+        final var door = signObject.getDoor();
+        if (door != null) {
+            matrices.push();
+            final var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
+            final var start = door.getFirst();
+            final var end = door.getSecond();
+            final var x1 = Math.min(start.getX(), end.getX()) + 0.05;
+            final var y1 = Math.min(start.getY(), end.getY()) + 0.05;
+            final var z1 = Math.min(start.getZ(), end.getZ()) + 0.05;
+            final var x2 = Math.max(start.getX(), end.getX()) + 0.95;
+            final var y2 = Math.max(start.getY(), end.getY()) + 0.95;
+            final var z2 = Math.max(start.getZ(), end.getZ()) + 0.95;
+            WorldRenderer.drawBox(
+                    matrices, vertexConsumer,
+                    x1, y1, z1,
+                    x2, y2, z2,
+                    1f, 1f, 0.5f, 0.5f,
+                    0f, 0f, 0f
+            );
+            matrices.pop();
+        }
+
         if (signObject.getBbShow()) {
             matrices.push();
             matrices.translate(0.5, 0.5, 0.5);
