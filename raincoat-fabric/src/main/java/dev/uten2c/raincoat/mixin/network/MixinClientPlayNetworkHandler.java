@@ -1,7 +1,6 @@
 package dev.uten2c.raincoat.mixin.network;
 
 import dev.uten2c.raincoat.network.PingListener;
-import dev.uten2c.raincoat.recipebook.RecipeManager;
 import dev.uten2c.raincoat.sign.SignListener;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -9,7 +8,6 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayPingS2CPacket;
-import net.minecraft.network.packet.s2c.play.SynchronizeRecipesS2CPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,11 +29,6 @@ public class MixinClientPlayNetworkHandler {
         if (!PingListener.onPing(packet.getParameter())) {
             ci.cancel();
         }
-    }
-
-    @Inject(method = "onSynchronizeRecipes", at = @At("TAIL"))
-    private void onSynchronizeRecipes(SynchronizeRecipesS2CPacket packet, CallbackInfo ci) {
-        RecipeManager.declareRecipes(packet.getRecipes());
     }
 
     @Inject(method = "onBlockEntityUpdate", at = @At("TAIL"))
