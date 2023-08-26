@@ -8,6 +8,7 @@
     "gui.MixinDrawContext",
     "gui.hud.MixinInGameHud",
     "gui.recipebook.MixinRecipeBookWidget",
+    "gui.screen.ingame.MixinCreativeInventoryScreen",
     "gui.screen.ingame.MixinHandledScreen",
     "gui.screen.option.MixinControlsOptionsScreen",
     "network.MixinAbstractClientPlayerEntity",
