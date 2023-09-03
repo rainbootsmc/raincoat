@@ -20,6 +20,9 @@ public final class Protocol {
     public static final @NotNull PacketId DIRECTION_SEND_REQUEST = id("direction/request");
     public static final @NotNull PacketId OUTDATED = id("outdated");
     public static final @NotNull PacketId OPEN_URL = id("open_url");
+    public static final @NotNull PacketId SHAPE_DISPLAY = id("shape/display");
+    public static final @NotNull PacketId SHAPE_DISCARD = id("shape/discard");
+    public static final @NotNull PacketId SHAPE_CLEAR = id("shape/clear");
 
     private Protocol() {
     }

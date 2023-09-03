@@ -2,7 +2,13 @@ package dev.uten2c.raincoat.resource
 
 import com.mojang.datafixers.util.Either
 import dev.uten2c.raincoat.*
+import dev.uten2c.raincoat.mixin.accessor.JsonUnbakedModelAccessor
+import dev.uten2c.raincoat.model.Display
+import dev.uten2c.raincoat.model.JsonModel
+import dev.uten2c.raincoat.model.ModelElement
+import dev.uten2c.raincoat.sign.FieldObjectModelMetadata
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
@@ -30,6 +36,7 @@ import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.DyeColor
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.Box
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
@@ -37,6 +44,9 @@ import kotlin.jvm.optionals.getOrNull
 
 object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
     private const val BASE_PATH = "rainboots/block"
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
 
     init {
         PreparableModelLoadingPlugin.register(::loadFieldObjects, ::replaceModel)
@@ -88,61 +98,100 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
         shouldUpdateCreativeTab = true
     }
 
-    private fun loadFieldObjects(resourceManager: ResourceManager, executor: Executor): CompletableFuture<List<String>?> {
+    private fun loadFieldObjects(resourceManager: ResourceManager, executor: Executor): CompletableFuture<LoadContext> {
         return CompletableFuture.supplyAsync(
             {
+                FieldObjectModelMetadata.clear()
+
                 val resource = resourceManager.getResource(Identifier("field_objects.txt")).getOrNull() ?: return@supplyAsync null
-                resource.inputStream.use { input ->
+                val fieldObjects = resource.inputStream.use { input ->
                     input.bufferedReader()
                         .readLines()
                         .filter { it.isNotEmpty() && it.first() != '#' }
                 }
+                LoadContext(resourceManager, fieldObjects)
             },
             executor,
         )
     }
 
-    private fun replaceModel(fieldObjectList: List<String>?, pluginContext: ModelLoadingPlugin.Context) {
-        if (fieldObjectList == null) {
-            return
-        }
+    private fun replaceModel(loadContext: LoadContext, pluginContext: ModelLoadingPlugin.Context) {
+        val fieldObjectList = loadContext.fieldObjectList ?: return
+
         pluginContext.modifyModelOnLoad().register { model, ctx ->
             val id = ctx.id()
-            if (id.namespace != MINECRAFT || id.path != "red_dye") {
-                return@register model
-            }
-            val atomicId = AtomicInteger(1000)
-            _idMap = mutableMapOf()
-            _itemTabIdMap = mutableMapOf()
 
-            val overrides = mutableListOf<ModelOverride>()
-            val missingModelCustomModelData = atomicId.getAndIncrement()
-            _idMap["missing"] = missingModelCustomModelData
-            overrides.add(
-                ModelOverride(
-                    Identifier("$BASE_PATH/missing"),
-                    listOf(ModelOverride.Condition(Identifier("custom_model_data"), missingModelCustomModelData.toFloat()))
+            if (id.namespace == MINECRAFT && id.path == "red_dye") {
+                val atomicId = AtomicInteger(1000)
+                _idMap = mutableMapOf()
+                _itemTabIdMap = mutableMapOf()
+
+                val overrides = mutableListOf<ModelOverride>()
+                val missingModelCustomModelData = atomicId.getAndIncrement()
+                _idMap["missing"] = missingModelCustomModelData
+                overrides.add(
+                    ModelOverride(
+                        Identifier("$BASE_PATH/missing"),
+                        listOf(ModelOverride.Condition(Identifier("custom_model_data"), missingModelCustomModelData.toFloat())),
+                    ),
                 )
-            )
 
-            fieldObjectList.forEach { modelId ->
-                val customModelData = atomicId.getAndIncrement()
-                val condition = ModelOverride.Condition(Identifier("custom_model_data"), customModelData.toFloat())
-                val override = ModelOverride(Identifier("$BASE_PATH/$modelId"), listOf(condition))
-                overrides.add(override)
-                _idMap[pathToId(modelId)] = customModelData
-                _itemTabIdMap[pathToId(modelId)] = customModelData
+                fieldObjectList.forEach { modelId ->
+                    val customModelData = atomicId.getAndIncrement()
+                    val condition = ModelOverride.Condition(Identifier("custom_model_data"), customModelData.toFloat())
+                    val override = ModelOverride(Identifier("$BASE_PATH/$modelId"), listOf(condition))
+                    overrides.add(override)
+                    _idMap[pathToId(modelId)] = customModelData
+                    _itemTabIdMap[pathToId(modelId)] = customModelData
+
+                    loadContext.resourceManager.getResource(Identifier("models/$BASE_PATH/$modelId.json")).ifPresent {
+                        runCatching {
+                            val jsonModel = json.decodeFromStream<JsonModel>(it.inputStream)
+                            val metadata = getFieldObjectModelMetadata(jsonModel) ?: return@runCatching
+                            FieldObjectModelMetadata.put(modelId, metadata)
+                            FieldObjectModelMetadata.put(customModelData, metadata)
+                        }.onFailure {
+                            it.printStackTrace()
+                        }
+                    }
+                }
+
+                return@register JsonUnbakedModel(
+                    Identifier("item/generated"),
+                    emptyList(),
+                    mapOf("layer0" to Either.left(SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier("item/red_dye")))),
+                    null,
+                    null,
+                    ModelTransformation.NONE,
+                    overrides,
+                )
             }
 
-            JsonUnbakedModel(
-                Identifier("item/generated"),
-                emptyList(),
-                mapOf("layer0" to Either.left(SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier("item/red_dye")))),
-                null,
-                null,
-                ModelTransformation.NONE,
-                overrides,
-            )
+            if (id.path.startsWith(BASE_PATH)) {
+                val modelId = id.path.replace("$BASE_PATH/", "")
+                if (modelId !in fieldObjectList) {
+                    return@register model
+                }
+
+                val resource = loadContext.resourceManager.getResource(Identifier("models/${id.path}.json")).getOrNull() ?: return@register model
+                val jsonModel = JsonUnbakedModel.deserialize(resource.inputStream.bufferedReader())
+                jsonModel as JsonUnbakedModelAccessor
+
+                val metadata = FieldObjectModelMetadata.getOrNull(modelId) ?: return@register model
+                val elements = jsonModel.rawElements
+                    .filterIndexed { i, _ -> i !in metadata.removeIndices }
+
+                return@register JsonUnbakedModel(
+                    jsonModel.parentId,
+                    elements,
+                    jsonModel.textureMap,
+                    jsonModel.ambientOcclusion,
+                    jsonModel.rawGuiLight,
+                    jsonModel.rawTransformations,
+                    emptyList(),
+                )
+            }
+            return@register model
         }
     }
 
@@ -180,4 +229,56 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
     private fun pathToId(path: String): String {
         return path.replace("/", "_")
     }
+
+    private fun getFieldObjectModelMetadata(jsonModel: JsonModel): FieldObjectModelMetadata? {
+        val groups = jsonModel.groups ?: return null
+        val elements = jsonModel.elements
+        if (elements == null) {
+            // TODO parent対応
+            return null
+        }
+        val indices = mutableSetOf<Int>()
+        val collisionBoxes = mutableSetOf<Box>()
+        val interactionBoxes = mutableSetOf<Box>()
+        groups
+            .asSequence()
+            .filterIsInstance<JsonModel.GroupItem.Group>()
+            .forEach { group ->
+                if (group.name == "collision") {
+                    val result = groupToBoxes(elements, group)
+                    indices.addAll(result.indices)
+                    collisionBoxes.addAll(result.boxes)
+                } else if (group.name == "interaction") {
+                    val result = groupToBoxes(elements, group)
+                    indices.addAll(result.indices)
+                    interactionBoxes.addAll(result.boxes)
+                }
+            }
+        return FieldObjectModelMetadata(jsonModel.display?.head ?: Display.IDENTITY, collisionBoxes, interactionBoxes, indices)
+    }
+
+    private fun indices(group: JsonModel.GroupItem.Group): List<Int> {
+        return group.children.flatMap {
+            when (it) {
+                is JsonModel.GroupItem.Number -> setOf(it.id)
+                is JsonModel.GroupItem.Group -> indices(it)
+            }
+        }
+    }
+
+    private fun groupToBoxes(elements: List<ModelElement>, group: JsonModel.GroupItem.Group): ConvertResult {
+        val indices = indices(group)
+        val boxes = indices.mapNotNull(elements::getOrNull)
+            .map {
+                Box(
+                    it.from.x.toDouble() / 16 - 0.5, it.from.y.toDouble() / 16, it.from.z.toDouble() / 16 + 0.5,
+                    it.to.x.toDouble() / 16 - 0.5, it.to.y.toDouble() / 16, it.to.z.toDouble() / 16 + 0.5,
+                )
+            }
+        return ConvertResult(indices, boxes)
+    }
+
+    private data class LoadContext(val resourceManager: ResourceManager, val fieldObjectList: List<String>?)
+
+    private data class ConvertResult(val indices: List<Int>, val boxes: List<Box>)
 }

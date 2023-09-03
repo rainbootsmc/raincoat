@@ -1,5 +1,6 @@
 package dev.uten2c.raincoat.mixin.gui.screen.ingame;
 
+import dev.uten2c.raincoat.States;
 import dev.uten2c.raincoat.resource.FieldObjectReloadListener;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -14,10 +15,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Mixin(CreativeInventoryScreen.class)
 public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> {
     @Unique
-    private static final Text RELOAD_TEXT = Text.literal("F3+T").setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY));
+    private static final Text RELOAD_TEXT = Text.literal("Reload resources").setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY));
+    @Unique
+    private final AtomicInteger offsetY = new AtomicInteger(0);
 
     public MixinCreativeInventoryScreen(CreativeInventoryScreen.CreativeScreenHandler screenHandler, PlayerInventory playerInventory, Text text) {
         super(screenHandler, playerInventory, text);
@@ -28,9 +33,16 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
         if (!FieldObjectReloadListener.getShouldShowItemTab()) {
             return;
         }
-        final var widget = new PressableTextWidget(
+        offsetY.set(4);
+        addReloadResourcesButton();
+        addToggleDebugShapeButton();
+    }
+
+    @Unique
+    private void addReloadResourcesButton() {
+        final var reloadButton = new PressableTextWidget(
                 width - textRenderer.getWidth(RELOAD_TEXT) - 4,
-                height - 9 - 4,
+                nextOffsetY(),
                 textRenderer.getWidth(RELOAD_TEXT),
                 9,
                 RELOAD_TEXT,
@@ -44,6 +56,29 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
                 },
                 textRenderer
         );
-        addDrawableChild(widget);
+        addDrawableChild(reloadButton);
+    }
+
+    @Unique
+    private void addToggleDebugShapeButton() {
+        final var toggleText = Text.literal("Debug shape: " + (States.getShowDebugShape() ? "true" : "false")).setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY));
+        final var toggleShowDebugShapeButton = new PressableTextWidget(
+                width - textRenderer.getWidth(toggleText) - 4,
+                nextOffsetY(),
+                textRenderer.getWidth(toggleText),
+                9,
+                toggleText,
+                button -> {
+                    States.setShowDebugShape(!States.getShowDebugShape());
+                    clearAndInit();
+                },
+                textRenderer
+        );
+        addDrawableChild(toggleShowDebugShapeButton);
+    }
+
+    @Unique
+    private int nextOffsetY() {
+        return offsetY.getAndUpdate(y -> y + 13);
     }
 }

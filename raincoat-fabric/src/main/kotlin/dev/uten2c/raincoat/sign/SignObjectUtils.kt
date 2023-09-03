@@ -28,9 +28,6 @@ object SignObjectUtils {
 
         val parsedIds = parseModelIds(texts[1])
         var replaceBlock: Block? = null
-        var bbStart: Vec3d? = null
-        var bbEnd: Vec3d? = null
-        var bbDisplay = false
         var offset: Vec3d? = null
         var door: Pair<BlockPos, BlockPos>? = null
         texts.drop(2)
@@ -40,27 +37,14 @@ object SignObjectUtils {
             .forEach { (key, value) ->
                 when (key) {
                     "b", "block" -> replaceBlock = Registries.BLOCK.get(Identifier(value))
-                    "bbs" -> bbStart = parseVec3d(value)
-                    "bbe" -> bbEnd = parseVec3d(value)
-                    "bb" -> {
-                        val result = parseBox(value)
-                        if (result != null) {
-                            bbStart = result.first
-                            bbEnd = result.second
-                        }
-                    }
-
-                    "bbd" -> bbDisplay = value.toBooleanStrictOrNull() ?: false
                     "o", "offset" -> offset = parseVec3d(value)
                     "door" -> door = parseBlockBox(value)
                 }
             }
         return SignObject(
             parsedIds.ids,
+            parsedIds.rawIds,
             replaceBlock ?: Blocks.BARRIER,
-            bbStart ?: Vec3d(-0.5, -0.5, -0.5),
-            bbEnd ?: Vec3d(0.5, 0.5, 0.5),
-            bbDisplay,
             offset ?: Vec3d(0.0, 0.0, 0.0),
             door,
             parsedIds.isOldId,
@@ -69,14 +53,15 @@ object SignObjectUtils {
 
     private fun parseModelIds(string: String): ParsedIds {
         var hasOldId = false
-        val ids = string.split("/")
+        val rawIds = string.split("/")
+        val ids = rawIds
             .map {
                 if (it.toIntOrNull() != null) {
                     hasOldId = true
                 }
                 FieldObjectReloadListener.idMap[it] ?: 1000
             }
-        return ParsedIds(ids, hasOldId)
+        return ParsedIds(rawIds, ids, hasOldId)
     }
 
     private fun parseVec3d(string: String): Vec3d? {
@@ -113,5 +98,5 @@ object SignObjectUtils {
         return values[0]!! to values[1]!!
     }
 
-    private data class ParsedIds(val ids: List<Int>, val isOldId: Boolean)
+    private data class ParsedIds(val rawIds: List<String>, val ids: List<Int>, val isOldId: Boolean)
 }

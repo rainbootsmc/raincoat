@@ -1,11 +1,15 @@
 package dev.uten2c.raincoat.mixin.render.block.entity;
 
+import dev.uten2c.raincoat.States;
+import dev.uten2c.raincoat.sign.FieldObjectModelMetadata;
 import dev.uten2c.raincoat.sign.SignListener;
 import dev.uten2c.raincoat.sign.SignObjectUtils;
+import dev.uten2c.raincoat.util.FieldObjectRenderUtils;
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WoodType;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -69,20 +73,33 @@ public class MixinSignBlockEntityRenderer {
 //            matrices.pop();
 //        }
 
+        if (!States.getShowDebugShape()) {
+            return;
+        }
+        final var cameraEntity = MinecraftClient.getInstance().cameraEntity;
+        if (cameraEntity == null) {
+            return;
+        }
+        final var maxDistance = 64 * 16;
+        final var distance = cameraEntity.squaredDistanceTo(entity.getPos().toCenterPos());
+        if (distance > maxDistance) {
+            return;
+        }
+
         final var door = signObject.getDoor();
         if (door != null) {
             matrices.push();
             matrices.translate(0.5, 0.5, 0.5);
-            final var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
             final var start = door.getFirst();
             final var end = door.getSecond();
-            final var x1 = Math.min(start.getX(), end.getX()) - 0.5;
-            final var y1 = Math.min(start.getY(), end.getY()) - 0.5;
-            final var z1 = Math.min(start.getZ(), end.getZ()) - 0.5;
-            final var x2 = Math.max(start.getX(), end.getX()) + 0.5;
-            final var y2 = Math.max(start.getY(), end.getY()) + 0.5;
-            final var z2 = Math.max(start.getZ(), end.getZ()) + 0.5;
+            final var x1 = Math.min(start.getX(), end.getX()) - 0.49;
+            final var y1 = Math.min(start.getY(), end.getY()) - 0.49;
+            final var z1 = Math.min(start.getZ(), end.getZ()) - 0.49;
+            final var x2 = Math.max(start.getX(), end.getX()) + 0.49;
+            final var y2 = Math.max(start.getY(), end.getY()) + 0.49;
+            final var z2 = Math.max(start.getZ(), end.getZ()) + 0.49;
+            final var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
             WorldRenderer.drawBox(
                     matrices, vertexConsumer,
                     x1, y1, z1,
@@ -93,37 +110,10 @@ public class MixinSignBlockEntityRenderer {
             matrices.pop();
         }
 
-        if (signObject.getBbShow()) {
-            matrices.push();
-            matrices.translate(0.5, 0.5, 0.5);
-            final var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
-            if (rotation % 90 == 0) {
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
-                final var bbStart = signObject.getBbStart();
-                final var bbEnd = signObject.getBbEnd();
-                final var x1 = Math.min(bbStart.x, bbEnd.x);
-                final var y1 = Math.min(bbStart.y, bbEnd.y);
-                final var z1 = Math.min(bbStart.z, bbEnd.z);
-                final var x2 = Math.max(bbStart.x, bbEnd.x);
-                final var y2 = Math.max(bbStart.y, bbEnd.y);
-                final var z2 = Math.max(bbStart.z, bbEnd.z);
-                WorldRenderer.drawBox(
-                        matrices, vertexConsumer,
-                        x1, y1, z1,
-                        x2, y2, z2,
-                        1f, 1f, 1f, 1f,
-                        0f, 0f, 0f
-                );
-            } else {
-                WorldRenderer.drawBox(
-                        matrices, vertexConsumer,
-                        -0.5, -0.5, -0.5,
-                        0.5, 0.5, 0.5,
-                        1f, 1f, 1f, 1f,
-                        0f, 0f, 0f
-                );
-            }
-            matrices.pop();
-        }
+        FieldObjectRenderUtils.drawSignPosCube(matrices, vertexConsumers, rotation);
+
+        final var metadata = FieldObjectModelMetadata.getOrDefault(signObject.getRawIds().get(0));
+//        FieldObjectRenderUtils.drawModelBasedOutline(matrices, vertexConsumers, rotation, metadata.getDisplay(), signObject.getOffset(), metadata.getCollision(), 0xffffffff);
+//        FieldObjectRenderUtils.drawModelBasedOutline(matrices, vertexConsumers, rotation, metadata.getDisplay(), signObject.getOffset(), metadata.getInteraction(), 0xff4444ff);
     }
 }

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "MixinMouse",
+    "accessor.JsonUnbakedModelAccessor",
     "gui.MixinDrawContext",
     "gui.hud.MixinInGameHud",
     "gui.screen.ingame.MixinCreativeInventoryScreen",
@@ -19,6 +20,8 @@
     "render.MixinItemRenderer",
     "render.MixinPlayerEntityRenderer",
     "render.block.entity.MixinSignBlockEntityRenderer",
+    "render.debug.MixinDebugRenderer",
+    "render.item.MixinItemRenderer",
     "updater.MixinTitleScreen"
   ],
   "mixins": [

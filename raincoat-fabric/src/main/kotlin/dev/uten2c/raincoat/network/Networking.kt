@@ -4,6 +4,8 @@ import dev.uten2c.raincoat.MOD_ID
 import dev.uten2c.raincoat.NamedKey
 import dev.uten2c.raincoat.Protocol
 import dev.uten2c.raincoat.States
+import dev.uten2c.raincoat.debug.DebugShape
+import dev.uten2c.raincoat.debug.DebugShapes
 import dev.uten2c.raincoat.option.OptionManager
 import dev.uten2c.raincoat.util.PacketId
 import dev.uten2c.raincoat.util.StackUtils
@@ -18,6 +20,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
+import net.minecraft.util.math.Vec3d
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.function.Consumer
@@ -34,6 +37,9 @@ object Networking {
         registerReceiver(Protocol.RECOIL_ANIMATION) { client, _, buf, _ -> onRecoilAnimation(client, buf) }
         registerReceiver(Protocol.OUTDATED) { _, _, _, _ -> onOutdatedSignal() }
         registerReceiver(Protocol.OPEN_URL) { client, _, buf, _ -> onOpenUrl(client, buf) }
+        registerReceiver(Protocol.SHAPE_DISPLAY) { _, _, buf, _ -> onShapeDisplay(buf) }
+        registerReceiver(Protocol.SHAPE_DISCARD) { _, _, buf, _ -> onShapeDiscard(buf) }
+        registerReceiver(Protocol.SHAPE_CLEAR) { _, _, buf, _ -> onShapeClear(buf) }
     }
 
     private fun onHandshakeRequest() {
@@ -106,6 +112,29 @@ object Networking {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun onShapeDisplay(buf: PacketByteBuf) {
+        val id = buf.readIdentifier()
+        val debugShape = DebugShape(
+            Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
+            Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
+            buf.readVarInt().toUInt(),
+        )
+        DebugShapes.addShape(id, debugShape)
+    }
+
+    private fun onShapeDiscard(buf: PacketByteBuf) {
+        DebugShapes.removeShape(buf.readIdentifier())
+    }
+
+    private fun onShapeClear(buf: PacketByteBuf) {
+        val namespace = buf.readNullable { it.readString() }
+        if (namespace == null) {
+            DebugShapes.clearShapes()
+        } else {
+            DebugShapes.clearShapesWithNamespace(namespace)
         }
     }
 

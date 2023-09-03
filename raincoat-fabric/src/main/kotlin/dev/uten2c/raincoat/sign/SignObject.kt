@@ -8,10 +8,8 @@ import net.minecraft.util.math.Vec3d
 
 data class SignObject(
     val ids: List<Int>,
+    val rawIds: List<String>,
     val replaceBlock: Block,
-    val bbStart: Vec3d,
-    val bbEnd: Vec3d,
-    val bbShow: Boolean,
     val offset: Vec3d,
     val door: Pair<BlockPos, BlockPos>?,
     val isOldId: Boolean,
