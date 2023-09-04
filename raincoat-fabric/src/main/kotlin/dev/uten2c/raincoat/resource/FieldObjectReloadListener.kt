@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
 
 object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
-    private const val BASE_PATH = "rainboots/block"
+    private const val BASE_PATH = "unbundled/block"
     private val json = Json {
         ignoreUnknownKeys = true
     }
