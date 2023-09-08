@@ -1,6 +1,7 @@
 {
   "key.categories.raincoat": "Rainboots クライアント",
   "key.raincoat.reload": "リロード",
+  "key.raincoat.toggle_fire_mode": "射撃モード切り替え",
   "raincoat.updater.close_game": "Minecraftを閉じる",
   "raincoat.options.title": "Rainboots オプション",
   "raincoat.options.ads_relative_sensitivity": "ADS時の相対マウス感度",

@@ -1,6 +1,7 @@
 {
   "key.categories.raincoat": "Rainboots Client",
   "key.raincoat.reload": "Reload",
+  "key.raincoat.toggle_fire_mode": "Toggle Fire Mode",
   "raincoat.updater.close_game": "Exit Minecraft",
   "raincoat.options.title": "Rainboots Options",
   "raincoat.options.ads_relative_sensitivity": "ADS Relative Sensitivity",

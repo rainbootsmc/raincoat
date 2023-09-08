@@ -4,4 +4,5 @@ public enum NamedKey {
     RELOAD,
     ATTACK,
     USE,
+    TOGGLE_FIRE_MODE,
 }

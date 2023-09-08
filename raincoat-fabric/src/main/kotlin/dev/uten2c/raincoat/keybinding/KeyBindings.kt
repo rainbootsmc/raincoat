@@ -13,13 +13,16 @@ import java.util.concurrent.ConcurrentHashMap
 object KeyBindings {
     private const val RAINCOAT_KEYBINDING_CATEGORY = "key.categories.raincoat"
     private const val RELOAD_KEYBINDING_KEY = "key.raincoat.reload"
+    private const val TOGGLE_FIRE_MODE_KEYBINDING_KEY = "key.raincoat.toggle_fire_mode"
     private val pressedKeys = ConcurrentHashMap.newKeySet<NamedKey>()
     private val queue: MutableList<() -> Unit> = ArrayList()
 
     fun register() {
         val reloadKeyBinding = KeyBindingHelper.registerKeyBinding(KeyBinding(RELOAD_KEYBINDING_KEY, GLFW.GLFW_KEY_R, RAINCOAT_KEYBINDING_CATEGORY))
+        val toggleFireModeKeyBinding = KeyBindingHelper.registerKeyBinding(KeyBinding(TOGGLE_FIRE_MODE_KEYBINDING_KEY, GLFW.GLFW_KEY_B, RAINCOAT_KEYBINDING_CATEGORY))
         ClientTickEvents.START_CLIENT_TICK.register { client ->
             listen(NamedKey.RELOAD, reloadKeyBinding.isPressed)
+            listen(NamedKey.TOGGLE_FIRE_MODE, toggleFireModeKeyBinding.isPressed)
 
             val leftClickKey = if (!OptionManager.options.isInvertAttackKey) NamedKey.ATTACK else NamedKey.USE
             listen(leftClickKey, client.options.attackKey.isPressed)
