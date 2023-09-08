@@ -5,6 +5,7 @@ import dev.uten2c.raincoat.option.OptionManager.options
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.option.GameOptionsScreen
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.OptionListWidget
 import net.minecraft.client.option.GameOptions
@@ -44,6 +45,11 @@ class RaincoatOptionsScreen(parent: Screen?, gameOptions: GameOptions) :
         "raincoat.options.hide_crosshair_when_ads",
         options.isHideCrosshairWhenAds,
     )
+    private val disableNarrator = SimpleOption.ofBoolean(
+        "raincoat.options.disable_narrator",
+        { Tooltip.of(Text.translatable("key.raincoat.toggle_fire_mode.description")) },
+        options.isNarratorDisabled,
+    ) {}
     private lateinit var buttonList: OptionListWidget
 
     override fun init() {
@@ -57,7 +63,7 @@ class RaincoatOptionsScreen(parent: Screen?, gameOptions: GameOptions) :
         buttonList.addSingleOptionEntry(adsRelativeSensibility)
         buttonList.addSingleOptionEntry(scope2xRelativeSensibility)
         buttonList.addSingleOptionEntry(scope4xRelativeSensibility)
-        buttonList.addOptionEntry(hideCrosshairWhenAds, null)
+        buttonList.addOptionEntry(hideCrosshairWhenAds, disableNarrator)
         addSelectableChild(this.buttonList)
         addDrawableChild(
             ButtonWidget.builder(ScreenTexts.DONE) {
@@ -75,6 +81,7 @@ class RaincoatOptionsScreen(parent: Screen?, gameOptions: GameOptions) :
             adsHold.value,
             invertAttackKey.value,
             hideCrosshairWhenAds.value,
+            disableNarrator.value
         )
         OptionManager.save(newOptions)
         sendSettingsUpdate()

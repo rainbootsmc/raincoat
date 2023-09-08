@@ -2,6 +2,7 @@
   "key.categories.raincoat": "Rainboots Client",
   "key.raincoat.reload": "Reload",
   "key.raincoat.toggle_fire_mode": "Toggle Fire Mode",
+  "key.raincoat.toggle_fire_mode.description": "To prevent conflicts between the fire mode toggle key and the narrator toggle key, the narrator toggle will be disabled.",
   "raincoat.updater.close_game": "Exit Minecraft",
   "raincoat.options.title": "Rainboots Options",
   "raincoat.options.ads_relative_sensitivity": "ADS Relative Sensitivity",
@@ -10,6 +11,7 @@
   "raincoat.options.ads": "ADS",
   "raincoat.options.invert_attack_key": "Invert Attack Key",
   "raincoat.options.hide_crosshair_when_ads": "Hide Crosshair When ADS",
+  "raincoat.options.disable_narrator": "Disable Narrator Toggle Key",
   "raincoat.options.key.toggle": "Toggle",
   "raincoat.options.key.hold": "Hold"
 }

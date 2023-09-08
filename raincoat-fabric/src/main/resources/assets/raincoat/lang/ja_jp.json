@@ -2,6 +2,7 @@
   "key.categories.raincoat": "Rainboots クライアント",
   "key.raincoat.reload": "リロード",
   "key.raincoat.toggle_fire_mode": "射撃モード切り替え",
+  "key.raincoat.toggle_fire_mode.description": "射撃モード切替キーとナレーター切り替えキーが競合するのを防ぐためにナレーター切り替えを無効化します",
   "raincoat.updater.close_game": "Minecraftを閉じる",
   "raincoat.options.title": "Rainboots オプション",
   "raincoat.options.ads_relative_sensitivity": "ADS時の相対マウス感度",
@@ -10,6 +11,7 @@
   "raincoat.options.ads": "ADS",
   "raincoat.options.invert_attack_key": "攻撃キーを反転",
   "raincoat.options.hide_crosshair_when_ads": "ADS時にクロスヘアを非表示",
+  "raincoat.options.disable_narrator": "ナレーター切り替えキーを無効化",
   "raincoat.options.key.toggle": "切り替え",
   "raincoat.options.key.hold": "長押し"
 }

@@ -11,4 +11,5 @@ data class RaincoatOptions(
     @SerialName("adsHold") val isAdsHold: Boolean = false,
     @SerialName("invertAttackKey") val isInvertAttackKey: Boolean = false,
     @SerialName("hideCrosshairWhenAds") val isHideCrosshairWhenAds: Boolean = true,
+    @SerialName("narratorDisabled") val isNarratorDisabled: Boolean = true,
 )

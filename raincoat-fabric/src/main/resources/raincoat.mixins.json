@@ -25,6 +25,7 @@
     "updater.MixinTitleScreen"
   ],
   "mixins": [
+    "MixinKeyboard",
     "block.MixinAbstractSignBlock",
     "block.MixinHangingSignBlock",
     "block.MixinWallSignBlock",
