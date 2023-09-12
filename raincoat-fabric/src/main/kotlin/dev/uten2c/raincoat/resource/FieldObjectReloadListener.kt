@@ -143,18 +143,30 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                     overrides.add(override)
                     _idMap[pathToId(modelId)] = customModelData
                     _itemTabIdMap[pathToId(modelId)] = customModelData
-
-                    loadContext.resourceManager.getResource(Identifier("models/$BASE_PATH/$modelId.json")).ifPresent {
-                        runCatching {
-                            val jsonModel = json.decodeFromStream<JsonModel>(it.inputStream)
-                            val metadata = getFieldObjectModelMetadata(jsonModel) ?: return@runCatching
-                            FieldObjectModelMetadata.put(modelId, metadata)
-                            FieldObjectModelMetadata.put(customModelData, metadata)
-                        }.onFailure {
-                            it.printStackTrace()
-                        }
-                    }
                 }
+
+                fieldObjectList
+                    .asSequence()
+                    .mapNotNull { modelId ->
+                        val resource = loadContext.resourceManager
+                            .getResource(Identifier("models/$BASE_PATH/$modelId.json"))
+                            .getOrNull()
+                            ?: return@mapNotNull null
+                        modelId to resource
+                    }
+                    .mapNotNull { (modelId, resource) ->
+                        val jsonModel = runCatching { json.decodeFromStream<JsonModel>(resource.inputStream) }
+                            .onFailure { it.printStackTrace() }
+                            .getOrNull()
+                            ?: return@mapNotNull null
+                        modelId to jsonModel
+                    }
+                    .sortedBy { it.second.parent?.toString() ?: "" }
+                    .forEach { (modelId, jsonModel) ->
+                        val metadata = getFieldObjectModelMetadata(jsonModel) ?: return@forEach
+                        FieldObjectModelMetadata.put(modelId, metadata)
+                        FieldObjectModelMetadata.put(_idMap[pathToId(modelId)]!!, metadata)
+                    }
 
                 return@register JsonUnbakedModel(
                     Identifier("item/generated"),
@@ -231,11 +243,16 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
     }
 
     private fun getFieldObjectModelMetadata(jsonModel: JsonModel): FieldObjectModelMetadata? {
-        val groups = jsonModel.groups ?: return null
+        val groups = jsonModel.groups ?: emptyList()
         val elements = jsonModel.elements
+        val parent = jsonModel.parent
         if (elements == null) {
-            // TODO parent対応
-            return null
+            if (parent == null) {
+                return null
+            }
+            val parentModelId = parent.path.replace("$BASE_PATH/", "")
+            val parentMetadata = FieldObjectModelMetadata.getOrNull(parentModelId) ?: return null
+            return parentMetadata.copy(display = jsonModel.display?.head ?: parentMetadata.display)
         }
         val indices = mutableSetOf<Int>()
         val collisionBoxes = mutableSetOf<Box>()

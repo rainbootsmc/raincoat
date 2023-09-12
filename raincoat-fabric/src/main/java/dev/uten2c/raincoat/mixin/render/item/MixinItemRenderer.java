@@ -36,10 +36,16 @@ public class MixinItemRenderer {
         if (metadata == null) {
             return;
         }
+        if (renderMode == ModelTransformationMode.GUI) {
+            return;
+        }
+
         matrices.translate(0.5, 0.0, -0.5);
         for (Box box : metadata.getCollision()) {
             WorldRenderer.drawBox(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), box, 1f, 1f, 1f, 1f);
         }
-//        FieldObjectReloadListener.getIdMap()
+        for (Box box : metadata.getInteraction()) {
+            WorldRenderer.drawBox(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), box, 0.5f, 0.5f, 1f, 1f);
+        }
     }
 }
