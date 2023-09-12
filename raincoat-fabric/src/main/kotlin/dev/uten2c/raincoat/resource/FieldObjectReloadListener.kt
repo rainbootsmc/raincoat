@@ -240,21 +240,33 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
         val indices = mutableSetOf<Int>()
         val collisionBoxes = mutableSetOf<Box>()
         val interactionBoxes = mutableSetOf<Box>()
+        val visualCollisionBoxes = mutableSetOf<Box>()
         groups
             .asSequence()
             .filterIsInstance<JsonModel.GroupItem.Group>()
+            .flatMap(::flatGroup)
             .forEach { group ->
-                if (group.name == "collision") {
-                    val result = groupToBoxes(elements, group)
-                    indices.addAll(result.indices)
-                    collisionBoxes.addAll(result.boxes)
-                } else if (group.name == "interaction") {
-                    val result = groupToBoxes(elements, group)
-                    indices.addAll(result.indices)
-                    interactionBoxes.addAll(result.boxes)
+                when (group.name) {
+                    "collision" -> {
+                        val result = groupToBoxes(elements, group)
+                        indices.addAll(result.indices)
+                        collisionBoxes.addAll(result.boxes)
+                    }
+
+                    "interaction" -> {
+                        val result = groupToBoxes(elements, group)
+                        indices.addAll(result.indices)
+                        interactionBoxes.addAll(result.boxes)
+                    }
+
+                    "visual" -> {
+                        val result = groupToBoxes(elements, group)
+                        indices.addAll(result.indices)
+                        visualCollisionBoxes.addAll(result.boxes)
+                    }
                 }
             }
-        return FieldObjectModelMetadata(jsonModel.display?.head ?: Display.IDENTITY, collisionBoxes, interactionBoxes, indices)
+        return FieldObjectModelMetadata(jsonModel.display?.head ?: Display.IDENTITY, collisionBoxes, interactionBoxes, visualCollisionBoxes, indices)
     }
 
     private fun indices(group: JsonModel.GroupItem.Group): List<Int> {
@@ -276,6 +288,10 @@ object FieldObjectReloadListener : SimpleSynchronousResourceReloadListener {
                 )
             }
         return ConvertResult(indices, boxes)
+    }
+
+    private fun flatGroup(group: JsonModel.GroupItem.Group): Collection<JsonModel.GroupItem.Group> {
+        return (listOf(group) + group.children.filterIsInstance<JsonModel.GroupItem.Group>().flatMap(::flatGroup)).toSet()
     }
 
     private data class LoadContext(val resourceManager: ResourceManager, val fieldObjectList: List<String>?)

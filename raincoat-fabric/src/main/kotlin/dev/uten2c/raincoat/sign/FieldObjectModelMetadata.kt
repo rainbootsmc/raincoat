@@ -3,7 +3,7 @@ package dev.uten2c.raincoat.sign
 import dev.uten2c.raincoat.model.Display
 import net.minecraft.util.math.Box
 
-data class FieldObjectModelMetadata(val display: Display, val collision: Collection<Box>, val interaction: Collection<Box>, val removeIndices: Collection<Int>) {
+data class FieldObjectModelMetadata(val display: Display, val collision: Collection<Box>, val interaction: Collection<Box>, val visualCollision: Collection<Box>, val removeIndices: Collection<Int>) {
     companion object {
         private val metadataMap = mutableMapOf<String, FieldObjectModelMetadata>()
         private val metadataIdMap = mutableMapOf<Int, FieldObjectModelMetadata>()
@@ -32,7 +32,7 @@ data class FieldObjectModelMetadata(val display: Display, val collision: Collect
 
         @JvmStatic
         fun getOrDefault(key: String): FieldObjectModelMetadata {
-            return metadataMap[key] ?: FieldObjectModelMetadata(Display.IDENTITY, emptySet(), emptySet(), emptySet())
+            return metadataMap[key] ?: FieldObjectModelMetadata(Display.IDENTITY, emptySet(), emptySet(), emptySet(), emptySet())
         }
     }
 }
