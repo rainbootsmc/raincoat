@@ -117,11 +117,23 @@ object Networking {
 
     private fun onShapeDisplay(buf: PacketByteBuf) {
         val id = buf.readIdentifier()
-        val debugShape = DebugShape(
-            Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
-            Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
-            buf.readVarInt().toUInt(),
-        )
+        val typeId = buf.readVarInt()
+        val debugShape = when (typeId) {
+            0 -> DebugShape.Box(
+                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
+                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
+                buf.readVarInt().toUInt(),
+            )
+
+            1 -> DebugShape.RotateBox(
+                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
+                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
+                buf.readQuaternionf(),
+                buf.readVarInt().toUInt(),
+            )
+
+            else -> throw IllegalStateException()
+        }
         DebugShapes.addShape(id, debugShape)
     }
 
