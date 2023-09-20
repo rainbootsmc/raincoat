@@ -4,7 +4,7 @@ import dev.uten2c.raincoat.util.PacketId;
 import org.jetbrains.annotations.NotNull;
 
 public final class Protocol {
-    public static final int PROTOCOL_VERSION = 5;
+    public static final int PROTOCOL_VERSION = 6;
 
     // C2S
     public static final @NotNull PacketId HANDSHAKE_RESPONSE = id("handshake/response");
