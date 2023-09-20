@@ -1,10 +1,14 @@
 package dev.uten2c.raincoat.debug
 
 import dev.uten2c.raincoat.util.FieldObjectRenderUtils
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.text.Text
 import net.minecraft.util.math.Vec3d
+import org.joml.Matrix4f
 import org.joml.Quaternionf
 
 sealed class DebugShape(color: UInt) {
@@ -45,6 +49,22 @@ sealed class DebugShape(color: UInt) {
                 halfX, halfY, halfZ,
                 red, green, blue, alpha,
             )
+            matrices.pop()
+        }
+    }
+
+    class Message(private val pos: Vec3d, private val message: Text, private val scale: Float, private val seeThrough: Boolean) : DebugShape(0xffffffffu) {
+        override fun draw(matrices: MatrixStack, vertexConsumers: VertexConsumerProvider.Immediate, cameraX: Double, cameraY: Double, cameraZ: Double) {
+            val client = MinecraftClient.getInstance()
+            val textRenderer = client.textRenderer
+            matrices.push()
+            matrices.translate(pos.x - cameraX, pos.y - cameraY, pos.z - cameraZ)
+            matrices.multiplyPositionMatrix(Matrix4f().rotate(client.gameRenderer.camera.rotation))
+            matrices.scale(-scale, -scale, -scale)
+            val offsetX = textRenderer.getWidth(message) / -2f
+            val color = (0xffffffffu).toInt()
+            val layer = if (seeThrough) TextRenderer.TextLayerType.SEE_THROUGH else TextRenderer.TextLayerType.NORMAL
+            textRenderer.draw(message, offsetX, 0f, color, false, matrices.peek().positionMatrix, vertexConsumers, layer, 0, 0xF000F0)
             matrices.pop()
         }
     }

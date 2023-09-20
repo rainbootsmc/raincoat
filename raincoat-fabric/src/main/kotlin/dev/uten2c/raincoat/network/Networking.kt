@@ -119,19 +119,9 @@ object Networking {
         val id = buf.readIdentifier()
         val typeId = buf.readVarInt()
         val debugShape = when (typeId) {
-            0 -> DebugShape.Box(
-                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
-                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
-                buf.readVarInt().toUInt(),
-            )
-
-            1 -> DebugShape.RotateBox(
-                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
-                Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble()),
-                buf.readQuaternionf(),
-                buf.readVarInt().toUInt(),
-            )
-
+            0 -> DebugShape.Box(buf.readVec3d(), buf.readVec3d(), buf.readVarInt().toUInt())
+            1 -> DebugShape.RotateBox(buf.readVec3d(), buf.readVec3d(), buf.readQuaternionf(), buf.readVarInt().toUInt())
+            2 -> DebugShape.Message(buf.readVec3d(), buf.readText(), buf.readFloat(), buf.readBoolean())
             else -> throw IllegalStateException()
         }
         DebugShapes.addShape(id, debugShape)
@@ -202,5 +192,9 @@ object Networking {
 
     private fun identifier(id: PacketId): Identifier {
         return Identifier(id.toString())
+    }
+
+    private fun PacketByteBuf.readVec3d(): Vec3d {
+        return Vec3d(readDouble(), readDouble(), readDouble())
     }
 }
