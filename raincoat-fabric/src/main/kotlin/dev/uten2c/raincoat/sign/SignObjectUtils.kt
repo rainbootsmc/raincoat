@@ -36,7 +36,13 @@ object SignObjectUtils {
             .map { it[0] to it[1] }
             .forEach { (key, value) ->
                 when (key) {
-                    "b", "block" -> replaceBlock = Registries.BLOCK.get(Identifier(value))
+                    "b", "block" -> {
+                        try {
+                            replaceBlock = Registries.BLOCK.get(Identifier(value))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
                     "o", "offset" -> offset = parseVec3d(value)
                     "door" -> door = parseBlockBox(value)
                 }
