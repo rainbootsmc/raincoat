@@ -46,7 +46,7 @@ public abstract class MixinGameRenderer {
             var targetScale = StackUtils.getGunModelScale(gunModelState);
 
             if (gunState == GunState.ADS || System.currentTimeMillis() - lastNoBobbingTime <= MARGIN_MILLIS) {
-                targetScale *= 0.01;
+                targetScale *= 0.01f;
                 if (gunState == GunState.ADS) {
                     lastNoBobbingTime = System.currentTimeMillis();
                 }
