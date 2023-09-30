@@ -37,7 +37,6 @@ class RaincoatMod : ClientModInitializer {
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(RaincoatModelReloadListener())
 
         ModelLoadingRegistry.INSTANCE.registerResourceProvider(::RaincoatModelProvider)
-
     }
 }
 
