@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("fabric-loom")
-    id("io.github.juuxel.loom-vineflower")
     kotlin("jvm") version Version.KOTLIN
     kotlin("plugin.serialization") version Version.KOTLIN
     id("com.modrinth.minotaur") version "2.+"

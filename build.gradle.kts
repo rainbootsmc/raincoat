@@ -1,6 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.3-SNAPSHOT" apply false
-    id("io.github.juuxel.loom-vineflower") version Version.LOOM_VINEFLOWER apply false
+    id("fabric-loom") version Version.LOOM apply false
 }
 
 subprojects {

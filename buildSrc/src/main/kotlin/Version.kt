@@ -1,5 +1,5 @@
 object Version {
-    const val LOOM_VINEFLOWER = "1.11.0"
+    const val LOOM = "1.4-SNAPSHOT"
     const val MINECRAFT = "1.20.1"
     const val YARN = "1.20.1+build.10"
     const val LOADER = "0.14.22"
