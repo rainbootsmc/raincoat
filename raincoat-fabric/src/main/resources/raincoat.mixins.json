@@ -33,6 +33,7 @@
     "block.entity.MixinHangingSignBlockEntity",
     "block.entity.MixinSignBlockEntity",
     "block.entity.MixinWallHangingSignBlock",
+    "entity.MixinLivingEntity",
     "item.MixinItemGroups"
   ],
   "injectors": {
