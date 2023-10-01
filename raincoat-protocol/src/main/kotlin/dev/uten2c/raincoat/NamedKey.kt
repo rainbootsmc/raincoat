@@ -1,6 +1,6 @@
-package dev.uten2c.raincoat;
+package dev.uten2c.raincoat
 
-public enum NamedKey {
+enum class NamedKey {
     RELOAD,
     ATTACK,
     USE,

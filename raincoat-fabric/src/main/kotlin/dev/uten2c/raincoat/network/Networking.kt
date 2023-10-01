@@ -31,15 +31,15 @@ object Networking {
 
     fun registerListeners() {
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> States.reset() }
-        registerReceiver(Protocol.HANDSHAKE_REQUEST) { _, _, _, _ -> onHandshakeRequest() }
-        registerReceiver(Protocol.DIRECTION_SEND_REQUEST) { _, _, buf, _ -> onDirectionSendRequest(buf) }
-        registerReceiver(Protocol.RECOIL_CAMERA) { client, _, buf, _ -> onCameraRecoil(client, buf) }
-        registerReceiver(Protocol.RECOIL_ANIMATION) { client, _, buf, _ -> onRecoilAnimation(client, buf) }
-        registerReceiver(Protocol.OUTDATED) { _, _, _, _ -> onOutdatedSignal() }
-        registerReceiver(Protocol.OPEN_URL) { client, _, buf, _ -> onOpenUrl(client, buf) }
-        registerReceiver(Protocol.SHAPE_DISPLAY) { _, _, buf, _ -> onShapeDisplay(buf) }
-        registerReceiver(Protocol.SHAPE_DISCARD) { _, _, buf, _ -> onShapeDiscard(buf) }
-        registerReceiver(Protocol.SHAPE_CLEAR) { _, _, buf, _ -> onShapeClear(buf) }
+        registerReceiver(Protocol.handshakeRequest) { _, _, _, _ -> onHandshakeRequest() }
+        registerReceiver(Protocol.directionSendRequest) { _, _, buf, _ -> onDirectionSendRequest(buf) }
+        registerReceiver(Protocol.recoilCamera) { client, _, buf, _ -> onCameraRecoil(client, buf) }
+        registerReceiver(Protocol.recoilAnimation) { client, _, buf, _ -> onRecoilAnimation(client, buf) }
+        registerReceiver(Protocol.outdated) { _, _, _, _ -> onOutdatedSignal() }
+        registerReceiver(Protocol.openUrl) { client, _, buf, _ -> onOpenUrl(client, buf) }
+        registerReceiver(Protocol.shapeDisplay) { _, _, buf, _ -> onShapeDisplay(buf) }
+        registerReceiver(Protocol.shapeDiscard) { _, _, buf, _ -> onShapeDiscard(buf) }
+        registerReceiver(Protocol.shapeClear) { _, _, buf, _ -> onShapeClear(buf) }
     }
 
     private fun onHandshakeRequest() {
@@ -52,7 +52,7 @@ object Networking {
         resBuf.writeString(version)
         resBuf.writeVarInt(Protocol.PROTOCOL_VERSION)
         LOGGER.info("Send handshake packet (version: {}, protocol: {})", version, Protocol.PROTOCOL_VERSION)
-        send(Protocol.HANDSHAKE_RESPONSE, resBuf)
+        send(Protocol.handshakeResponse, resBuf)
         sendSettingsUpdate()
     }
 
@@ -149,17 +149,17 @@ object Networking {
 
     @JvmStatic
     fun sendKeyPressedPacket(key: NamedKey) {
-        send(Protocol.KEY_PRESSED) { buf: PacketByteBuf -> buf.writeEnumConstant(key) }
+        send(Protocol.keyPressed) { buf: PacketByteBuf -> buf.writeEnumConstant(key) }
     }
 
     @JvmStatic
     fun sendKeyReleasedPacket(key: NamedKey) {
-        send(Protocol.KEY_RELEASED) { buf: PacketByteBuf -> buf.writeEnumConstant(key) }
+        send(Protocol.keyReleased) { buf: PacketByteBuf -> buf.writeEnumConstant(key) }
     }
 
     fun sendDirectionUpdate(yaw: Float, pitch: Float) {
         val requestedTime = States.directionSendRequestedTime ?: return
-        send(Protocol.DIRECTION_UPDATE) { buf: PacketByteBuf ->
+        send(Protocol.directionUpdate) { buf: PacketByteBuf ->
             buf.writeVarInt((System.currentTimeMillis() - requestedTime).toInt())
             buf.writeFloat(yaw)
             buf.writeFloat(pitch)
@@ -167,7 +167,7 @@ object Networking {
     }
 
     fun sendSettingsUpdate() {
-        send(Protocol.SETTINGS_UPDATE) { buf: PacketByteBuf -> buf.writeBoolean(OptionManager.options.isAdsHold) }
+        send(Protocol.settingsUpdate) { buf: PacketByteBuf -> buf.writeBoolean(OptionManager.options.isAdsHold) }
     }
 
     private fun registerReceiver(id: PacketId, channelHandler: ClientPlayNetworking.PlayChannelHandler) {
