@@ -26,6 +26,7 @@ object StackUtils {
     private const val GUN_MODEL_STATE = "GunModelState"
     private const val GUN_RECOIL_MODEL_STATE = "GunRecoilModelState"
     private const val ZOOM_LEVEL = "ZoomLevel"
+    private const val EQUIP_DURATION = "EquipDuration"
 
     @JvmStatic
     fun isGun(stack: ItemStack): Boolean {
@@ -77,7 +78,7 @@ object StackUtils {
         val nbt = stack.getSubNbt(NAMESPACE) ?: return null
         val ordinal = nbt.getInt(GUN_STATE)
         return try {
-            GunState.values()[ordinal]
+            GunState.entries[ordinal]
         } catch (e: Exception) {
             null
         }
@@ -94,10 +95,16 @@ object StackUtils {
     fun getZoomLevel(stack: ItemStack): ZoomLevel? {
         val nbt = stack.getSubNbt(NAMESPACE) ?: return null
         return try {
-            ZoomLevel.values()[nbt.getInt(ZOOM_LEVEL) - 1]
+            ZoomLevel.entries[nbt.getInt(ZOOM_LEVEL) - 1]
         } catch (e: Exception) {
             null
         }
+    }
+
+    @JvmStatic
+    fun getEquipDuration(stack: ItemStack): Int {
+        val nbt = stack.getSubNbt(NAMESPACE) ?: return 0
+        return nbt.getInt(EQUIP_DURATION)
     }
 
     @JvmStatic

@@ -21,6 +21,7 @@
     "render.MixinPlayerEntityRenderer",
     "render.block.entity.MixinSignBlockEntityRenderer",
     "render.debug.MixinDebugRenderer",
+    "render.item.MixinHeldItemRenderer",
     "render.item.MixinItemRenderer",
     "updater.MixinTitleScreen"
   ],
