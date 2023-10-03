@@ -1,6 +1,7 @@
 package dev.uten2c.raincoat.mixin.render;
 
 import dev.uten2c.raincoat.States;
+import dev.uten2c.raincoat.shake.ShakeEffectUtils;
 import dev.uten2c.raincoat.util.GunState;
 import dev.uten2c.raincoat.util.StackUtils;
 import net.minecraft.client.MinecraftClient;
@@ -16,7 +17,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public abstract class MixinGameRenderer {
@@ -32,6 +35,16 @@ public abstract class MixinGameRenderer {
     @Shadow
     @Final
     MinecraftClient client;
+
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;tiltViewWhenHurt(Lnet/minecraft/client/util/math/MatrixStack;F)V", shift = At.Shift.AFTER))
+    private void shakeEffect(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci) {
+        final var shakeEffect = States.getShakeEffect();
+        if (shakeEffect == null || !shakeEffect.shouldPlay()) {
+            return;
+        }
+        final var strength = 1f - (float) Math.pow(shakeEffect.getProgress(), 3.0);
+        ShakeEffectUtils.shake(matrices, MathHelper.clamp(strength, 0f, 1f) * shakeEffect.getStrength());
+    }
 
     @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;bobView(Lnet/minecraft/client/util/math/MatrixStack;F)V"))
     private void bobView1(GameRenderer instance, MatrixStack matrices, float tickDelta) {

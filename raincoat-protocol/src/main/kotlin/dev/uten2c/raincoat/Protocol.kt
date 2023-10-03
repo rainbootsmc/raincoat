@@ -3,7 +3,7 @@ package dev.uten2c.raincoat
 import dev.uten2c.raincoat.util.PacketId
 
 object Protocol {
-    const val PROTOCOL_VERSION = 6
+    const val PROTOCOL_VERSION = 7
 
     // C2S
     val handshakeResponse = id("handshake/response")
@@ -22,6 +22,8 @@ object Protocol {
     val shapeDisplay = id("shape/display")
     val shapeDiscard = id("shape/discard")
     val shapeClear = id("shape/clear")
+    val shakePlay = id("shake/play")
+    val shakeStop = id("shake/stop")
 
     private fun id(id: String): PacketId {
         return PacketId(id)

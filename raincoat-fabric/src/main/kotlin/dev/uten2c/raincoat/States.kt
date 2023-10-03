@@ -1,6 +1,7 @@
 package dev.uten2c.raincoat
 
 import dev.uten2c.raincoat.debug.DebugShapes
+import dev.uten2c.raincoat.shake.ShakeEffect
 
 object States {
     @JvmStatic
@@ -18,11 +19,15 @@ object States {
     @JvmStatic
     var showDebugShape = false
 
+    @JvmStatic
+    var shakeEffect: ShakeEffect? = null
+
     fun reset() {
         isOnServer = false
         isHandshakeReceived = false
         directionSendRequestedTime = null
         isRecoiling = false
+        shakeEffect = null
         DebugShapes.clearShapes()
     }
 

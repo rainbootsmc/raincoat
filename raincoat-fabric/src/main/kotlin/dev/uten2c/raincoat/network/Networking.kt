@@ -7,9 +7,11 @@ import dev.uten2c.raincoat.States
 import dev.uten2c.raincoat.debug.DebugShape
 import dev.uten2c.raincoat.debug.DebugShapes
 import dev.uten2c.raincoat.option.OptionManager
+import dev.uten2c.raincoat.shake.ShakeEffect
 import dev.uten2c.raincoat.util.PacketId
 import dev.uten2c.raincoat.util.StackUtils
 import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
@@ -24,6 +26,8 @@ import net.minecraft.util.math.Vec3d
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.function.Consumer
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 object Networking {
     private val LOGGER = LoggerFactory.getLogger("Raincoat Networking")
@@ -40,6 +44,8 @@ object Networking {
         registerReceiver(Protocol.shapeDisplay) { _, _, buf, _ -> onShapeDisplay(buf) }
         registerReceiver(Protocol.shapeDiscard) { _, _, buf, _ -> onShapeDiscard(buf) }
         registerReceiver(Protocol.shapeClear) { _, _, buf, _ -> onShapeClear(buf) }
+        registerReceiver(Protocol.shakePlay) { _, _, buf, _ -> onShakePlay(buf) }
+        registerReceiver(Protocol.shakeStop) { _, _, _, _ -> onShakeStop() }
     }
 
     private fun onHandshakeRequest() {
@@ -138,6 +144,16 @@ object Networking {
         } else {
             DebugShapes.clearShapesWithNamespace(namespace)
         }
+    }
+
+    private fun onShakePlay(buf: PacketByteBuf) {
+        val duration = buf.readNullable(PacketByteBuf::readVarLong)?.milliseconds ?: Duration.INFINITE
+        val strength = buf.readFloat()
+        States.shakeEffect = ShakeEffect(Clock.System.now(), duration, strength)
+    }
+
+    private fun onShakeStop() {
+        States.shakeEffect = null
     }
 
     private fun confirmOpenLink(client: MinecraftClient, parentScreen: Screen?, open: Boolean, uri: URI) {
